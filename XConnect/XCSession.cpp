@@ -17,7 +17,7 @@
 WNDCLASS wc;
 HWND hWnd;
 UINT XC_CALL = 0;
-static UINT FDSModuleCallMessage = WM_USER + 256;
+static UINT XCModuleCallMessage = WM_USER + 256;
 __int32 GlobalOperationType = WaitingT;
 
 
@@ -26,7 +26,7 @@ __int32 GlobalOperationType = WaitingT;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
-	if((message == XC_CALL) || (message == FDSModuleCallMessage)) 
+	if((message == XC_CALL) || (message == XCModuleCallMessage)) 
 	{
 		HANDLE hMap = 0;
 		BYTE* pView = NULL;
@@ -42,7 +42,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		ATOM atom = wParam;
 		LRESULT result = XC_RETURN_FAILURE;
 
-		if (message == FDSModuleCallMessage) {
+		if (message == XCModuleCallMessage) {
 			hMap = (BYTE*)lParam;
 		}
 		else {
@@ -51,7 +51,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 
 		if (hMap) {
-			if (message == FDSModuleCallMessage)
+			if (message == XCModuleCallMessage)
 				pView = (BYTE*)hMap;
 			else
 				pView = (BYTE*)MapViewOfFile(hMap, FILE_MAP_WRITE, 0, 0, 0);

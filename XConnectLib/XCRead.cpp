@@ -1017,7 +1017,7 @@ void GetVariable(BYTE* target, DWORD offset, DWORD size)
 		CopyMemory(target, &ret, size);
 	}
 	else if(offset==0x3304)
-	{	// FDSConnectX Version
+	{	// XConnect Version
 		int version = 0x20000000;
 		CopyMemory(target, &version, size);
 	}
