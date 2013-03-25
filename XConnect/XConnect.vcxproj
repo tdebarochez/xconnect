@@ -71,7 +71,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\FDSConnectLib;..\SDK\CHeaders\XPLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\XConnectLib;C:\Games\X-Plane 10\SDK\CHeaders\XPLM;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;FDSCONNECTX_EXPORTS;IBM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -81,7 +81,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>XPLM.lib;FDSConnectLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>XPLM.lib;XConnectLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)XConnect\win.xpl</OutputFile>
       <AdditionalLibraryDirectories>..\Release;C:\Games\X-Plane 10\SDK\Libraries\Win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
