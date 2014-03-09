@@ -18,6 +18,7 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "Conversion.h"
 #include "Common.h"
 #include <stdio.h>
+#include <stdint.h>
 
 XPLMDataRef GetDataRef(const char* dataRef)
 {
@@ -95,7 +96,7 @@ namespace xcread
 	  float agl = GetFloat("sim/flightmodel/position/y_agl");
 	  float msl = GetFloat("sim/flightmodel/position/elevation");
 
-	  int ga = (int)((msl - agl) * 256.0);
+	  int32_t ga = (int32_t)((msl - agl) * 256.0);
 
 	  XCCopyMemory(target, &ga);
   }
@@ -167,29 +168,29 @@ namespace xcread
   {	// day in year
 
 	  int day = GetInt("sim/time/local_date_days");
-	  short sDay = (short)day;
+	  int16_t sDay = (int16_t)day;
 	  XCCopyMemory(target, &sDay);
   }
 
   void Paused(unsigned char* target)
   {   // Paused
 	  int pause = GetInt("sim/time/paused");
-	  short sPause = (short)pause;
+	  int16_t sPause = (int16_t)pause;
 	  XCCopyMemory(target, &sPause);
   }
 
   void MagVar(unsigned char* target)
   {   // mag var
-	  float magvar = GetFloat("sim/flightmodel/position/magnetic_variation") / 360.0 * 65536;
-	  short sMagVar = -(short)magvar;
+	  float magvar = GetFloat("sim/flightmodel/position/magnetic_variation") / 360.0f * 65536;
+	  int16_t sMagVar = -(int16_t)magvar;
 	  XCCopyMemory(target, &sMagVar);
   }
 
   void GS(unsigned char* target)
   {	// Ground speed
 
-	  float gs = GetFloat("sim/flightmodel/position/groundspeed") * 65536.0;
-	  unsigned int iGS = (unsigned int)gs;
+	  float gs = GetFloat("sim/flightmodel/position/groundspeed") * 65536.0f;
+	  uint32_t iGS = (uint32_t)gs;
 
 	  XCCopyMemory(target, &iGS);
 
@@ -198,10 +199,10 @@ namespace xcread
   void TAS(unsigned char* target)
   {	// TAS
 
-	  float ias = MetersToKnot(GetFloat("sim/flightmodel/position/true_airspeed") * 128.0);
+	  float ias = MetersToKnot(GetFloat("sim/flightmodel/position/true_airspeed") * 128.0f);
 
 	  //fprintf(str, "TAS: %e\n", ias);
-	  unsigned int iIAS = (unsigned int)ias;
+	  uint32_t iIAS = (uint32_t)ias;
 
 	  XCCopyMemory(target, &iIAS);
   }
@@ -209,8 +210,8 @@ namespace xcread
   void IAS(unsigned char* target)
   {	// IAS
 
-	  float ias = GetFloat("sim/flightmodel/position/indicated_airspeed2") * 128.0;
-	  int iIAS = (int)ias;
+	  float ias = GetFloat("sim/flightmodel/position/indicated_airspeed2") * 128.0f;
+	  int32_t iIAS = (int32_t)ias;
 
 	  XCCopyMemory(target, &iIAS);
   }
@@ -218,8 +219,8 @@ namespace xcread
   void VS(unsigned char* target)
   {	// vertical speed
 	  float vs = GetFloat("sim/cockpit2/gauges/indicators/vvi_fpm_pilot");
-	  vs = vs / 60.0 / 3.28084 * 256;
-	  int iVs = (int)vs;
+	  vs = vs / 60.0f / 3.28084f * 256;
+	  int32_t iVs = (int32_t)vs;
 	  XCCopyMemory(target, &iVs);
   }	
 
@@ -227,7 +228,7 @@ namespace xcread
   {	// adf2 freq
 	  int freq = GetInt("sim/cockpit/radios/adf2_freq_hz");
 		
-	  short res = (short)GetBCD(freq);
+	  int16_t res = (int16_t)GetBCD(freq);
 	  XCCopyMemory(target, &res);
   }
 
@@ -269,21 +270,21 @@ namespace xcread
   void QNH(unsigned char* target)
   {	// altimeter
 	  float altimeter = GetFloat("sim/cockpit/misc/barometer_setting");
-	  short sAlt = ((short)InchToHPA(altimeter)) * 16;
+	  int16_t sAlt = ((int16_t)InchToHPA(altimeter)) * 16;
 	  XCCopyMemory(target, &sAlt);
   }
 
   void Transponder(unsigned char* target)
   {
-	  short xpdr = GetInt("sim/cockpit/radios/transponder_code");
-	  short bcd = GetBCD(xpdr);
+	  int16_t xpdr = GetInt("sim/cockpit/radios/transponder_code");
+	  int16_t bcd = GetBCD(xpdr);
 	  XCCopyMemory(target, &xpdr);
   }
 
   void OnGround(unsigned char* target)
   {
 	  float agl = GetFloat("sim/flightmodel/position/y_agl");
-	  short onground = 0;
+	  int16_t onground = 0;
 	  if(agl<4)
 	  {
 		  onground = 1;
@@ -295,7 +296,7 @@ namespace xcread
   {	// adf1 freq
 	  int freq = GetInt("sim/cockpit/radios/adf1_freq_hz");
 		
-	  short res = (short)GetBCD(freq);
+	  int16_t res = (int16_t)GetBCD(freq);
 	  XCCopyMemory(target, &res);
   }
 
@@ -305,7 +306,7 @@ namespace xcread
 		
 	  //fprintf(str, "Nav 1 freq: %d\n", freq);
 
-	  short res = (short)GetBCD(freq);
+	  int16_t res = (int16_t)GetBCD(freq);
 	  XCCopyMemory(target, &res);
   }
 
@@ -315,7 +316,7 @@ namespace xcread
 		
 	  //fprintf(str, "Nav 1 freq: %d\n", freq);
 
-	  short res = (short)GetBCD(freq);
+	  int16_t res = (int16_t)GetBCD(freq);
 	  XCCopyMemory(target, &res);
   }
 
@@ -323,7 +324,7 @@ namespace xcread
   {	// nav2 freq
 	  int freq = GetInt("sim/cockpit/radios/nav2_freq_hz") - 10000;
 		
-	  short res = (short)GetBCD(freq);
+	  int16_t res = (int16_t)GetBCD(freq);
 	  XCCopyMemory(target, &res);
   }
 
@@ -333,21 +334,17 @@ namespace xcread
 
 	  latitude = latitude * (10001750.0 * 65536.0 * 65536.0) / 90.0;
 
-	  long long lLat = (long long) latitude;
+	  int64_t lLat = (int64_t) latitude;
 
 	  BYTE* lTarget = XConnectMemBlock;
 	  lTarget += 0x0560;
 
-	  int dLo = (lLat & 0xFFFFFFFF);
-	  int dHi = (lLat & 0xFFFFFFFF00000000) >> 32;
+	  uint32_t dLo = ((uint32_t*)&lLat)[1];
+	  uint32_t dHi = ((uint32_t*)&lLat)[0];
 
-	  XCCopyMemory(lTarget, &dLo);
-	  XCCopyMemory(lTarget + 0x0004, &dHi);
+	  XCCopyMemory(lTarget, &lLat);
 
-	  //XCCopyMemory(lTarget, &, 8);
-		
-
-	  XCCopyMemory(target, lTarget);
+	  XCCopyMemory(target, &dHi);
   }
 
   void LatitudeLo(unsigned char* target)
@@ -356,20 +353,17 @@ namespace xcread
 
 	  latitude = latitude * (10001750.0 * 65536.0 * 65536.0) / 90.0;
 
-	  long long lLat = (long long) latitude;
+	  int64_t lLat = (int64_t) latitude;
 
 	  BYTE* lTarget = XConnectMemBlock;
 	  lTarget += 0x0560;
 
-	  int dLo = (lLat & 0xFFFFFFFF);
-	  int dHi = (lLat & 0xFFFFFFFF00000000) >> 32;
+	  uint32_t dLo = ((uint32_t*)&lLat)[1];
+	  uint32_t dHi = ((uint32_t*)&lLat)[0];
 
-	  XCCopyMemory(lTarget, &dLo);
-	  XCCopyMemory(lTarget + 0x0004, &dHi);
+	  XCCopyMemory(lTarget, &lLat);
 
-	  lTarget += 0x0004;
-
-	  XCCopyMemory(target, lTarget);
+	  XCCopyMemory(target, &dLo);
   }
 
   void LongitudeHi(unsigned char* target)
@@ -378,20 +372,17 @@ namespace xcread
 
 	  longitude = longitude * (65536.0 * 65536.0 * 65536.0 * 65536.0) / 360.0;
 
-	  long long lLon = (long long)longitude;
+	  int64_t lLon = (int64_t)longitude;
 		
 	  BYTE* lTarget = XConnectMemBlock;
 	  lTarget += 0x0568;
 
-	  int dLo = (lLon & 0xFFFFFFFF);
-	  int dHi = (lLon & 0xFFFFFFFF00000000) >> 32;
+	  uint32_t dLo = ((uint32_t*)&lLon)[1];
+	  uint32_t dHi = ((uint32_t*)&lLon)[0];
 
-	  XCCopyMemory(lTarget, &dLo);
-	  XCCopyMemory(lTarget + 0x0004, &dHi);
+	  XCCopyMemory(lTarget, &lLon);
 
-	  //XCCopyMemory(lTarget, &lLon, 8);
-
-	  XCCopyMemory(target, lTarget);
+	  XCCopyMemory(target, &dHi);
   }
 
   void LongitudeLo(unsigned char* target)
@@ -400,27 +391,24 @@ namespace xcread
 
 	  longitude = longitude * (65536.0 * 65536.0 * 65536.0 * 65536.0) / 360.0;
 
-	  long long lLon = (long long)longitude;
+	  int64_t lLon = (int64_t)longitude;
 		
 	  BYTE* lTarget = XConnectMemBlock;
 	  lTarget += 0x0568;
 
-	  int dLo = (lLon & 0xFFFFFFFF);
-	  int dHi = (lLon & 0xFFFFFFFF00000000) >> 32;
+	  uint32_t dLo = ((uint32_t*)&lLon)[1];
+	  uint32_t dHi = ((uint32_t*)&lLon)[0];
 
-	  XCCopyMemory(lTarget, &dLo);
-	  XCCopyMemory(lTarget + 0x0004, &dHi);
+	  XCCopyMemory(lTarget, &lLon);
 
-	  lTarget += 0x0004;
-
-	  XCCopyMemory(target, lTarget);
+	  XCCopyMemory(target, &dLo);
   }
 
   void Altitude(unsigned char* target)
   {
 	  double elevation = GetDouble("sim/flightmodel/position/elevation");
 
-	  long long lAlt = (long long)(elevation * 65536.0 * 65536.0);
+	  int64_t lAlt = (int64_t)(elevation * 65536.0 * 65536.0);
 
 	  XCCopyMemory(target, &lAlt);
   }
@@ -428,16 +416,16 @@ namespace xcread
   void Pitch(unsigned char* target)
   {	// pitch
 	  float pitch = GetFloat("sim/flightmodel/position/theta");
-	  pitch = pitch / 360.0 * (65536.0 * 65536.0);
-	  int iPitch = (int)-pitch;
+	  pitch = pitch / 360.0f * (65536.0f * 65536.0f);
+	  int32_t iPitch = (int32_t)-pitch;
 	  XCCopyMemory(target, &iPitch);
   }
 
   void Roll(unsigned char* target)
   {	// bank
 	  float bank = GetFloat("sim/flightmodel/position/phi");
-	  bank = bank / 360.0 * (65536.0 * 65536.0);
-	  int iBank = (int)-bank;
+	  bank = bank / 360.0f * (65536.0f * 65536.0f);
+	  int32_t iBank = (int32_t)-bank;
 	  XCCopyMemory(target, &iBank);
   }
 
@@ -449,7 +437,7 @@ namespace xcread
 
 	  //fprintf(str, "Heading: %e\n", hdg);
 
-	  unsigned int iHdg = (unsigned int)hdg;
+	  uint32_t iHdg = (uint32_t)hdg;
 
 	  //fprintf(str, "Heading int: %d\n", iHdg);
 	  XCCopyMemory(target, &iHdg);
@@ -457,7 +445,7 @@ namespace xcread
 
   void NAV2RwyHdg(unsigned char* target)
   {	// runway heading nav2
-	  short crs = (short)(WrapHeading(GetFloat("sim/cockpit/radios/nav2_course_degm") + 180) / 360.0 * 65536.0);
+	  int16_t crs = (int16_t)(WrapHeading(GetFloat("sim/cockpit/radios/nav2_course_degm") + 180) / 360.0 * 65536.0);
 	  XCCopyMemory(target, &crs);
   }
 
@@ -493,7 +481,7 @@ namespace xcread
 							  NULL);	// reg
 	  }
 
-	  int lat = (int)(latitude / 90.0 * 10001750.0);
+	  int32_t lat = (int32_t)(latitude / 90.0 * 10001750.0);
 
 	  XCCopyMemory(target, &lat);
   }
@@ -530,7 +518,7 @@ namespace xcread
 							  NULL);	// reg
 	  }
 
-	  int lat = (int)(latitude / 90.0 * 10001750.0);
+	  int32_t lat = (int32_t)(latitude / 90.0 * 10001750.0);
 
 	  XCCopyMemory(target, &lat);
   }
@@ -567,7 +555,7 @@ namespace xcread
 							  NULL);	// reg
 	  }
 
-	  int lon = (int)(longitude / 360.0 * (65536.0 * 65536.0));
+	  int32_t lon = (int32_t)(longitude / 360.0 * (65536.0 * 65536.0));
 
 	  XCCopyMemory(target, &lon);
   }
@@ -604,7 +592,7 @@ namespace xcread
 							  NULL);	// reg
 	  }
 
-	  int lon = (int)(longitude / 360.0 * (65536.0 * 65536.0));
+	  int32_t lon = (int32_t)(longitude / 360.0 * (65536.0 * 65536.0));
 
 	  XCCopyMemory(target, &lon);
   }
@@ -612,7 +600,7 @@ namespace xcread
   void NAV1RwyHdg(unsigned char* target)
   {	// runway heading nav1
 
-	  short crs = (short)(WrapHeading(GetFloat("sim/cockpit/radios/nav1_course_degm") + 180) / 360.0 * 65536.0);
+	  int16_t crs = (int16_t)(WrapHeading(GetFloat("sim/cockpit/radios/nav1_course_degm") + 180) / 360.0 * 65536.0);
 	  XCCopyMemory(target, &crs);
   }
 
@@ -624,7 +612,7 @@ namespace xcread
 	  float weightkg = GetFloat("sim/flightmodel/weight/m_fuel", 1);
 
 	  float proc = weightkg / (ratio * total);
-	  int iProc = (int)(proc * 128.0 * 65536.0);
+	  int32_t iProc = (int32_t)(proc * 128.0 * 65536.0);
 
 	  XCCopyMemory(target, &iProc);
   }
@@ -634,7 +622,7 @@ namespace xcread
 
 	  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 1);
 	  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
-	  int cap = (int)KilogramsToGallons(ratio * total);
+	  int32_t cap = (int32_t)KilogramsToGallons(ratio * total);
 
 	  XCCopyMemory(target, &cap);
   }
@@ -646,7 +634,7 @@ namespace xcread
 	  float weightkg = GetFloat("sim/flightmodel/weight/m_fuel", 0);
 
 	  float proc = weightkg / (ratio * total);
-	  int iProc = (int)(proc * 128.0 * 65536.0);
+	  int32_t iProc = (int32_t)(proc * 128.0 * 65536.0);
 
 	  XCCopyMemory(target, &iProc);
 
@@ -657,7 +645,7 @@ namespace xcread
   {
 	  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 0);
 	  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
-	  int cap = (int)KilogramsToGallons(ratio * total);
+	  int32_t cap = (int32_t)KilogramsToGallons(ratio * total);
 
 	  XCCopyMemory(target, &cap);
   }
@@ -669,7 +657,7 @@ namespace xcread
 	  float weightkg = GetFloat("sim/flightmodel/weight/m_fuel", 2);
 
 	  float proc = weightkg / (ratio * total);
-	  int iProc = (int)(proc * 128.0 * 65536.0);
+	  int32_t iProc = (int32_t)(proc * 128.0 * 65536.0);
 
 	  XCCopyMemory(target, &iProc);
   }
@@ -678,20 +666,20 @@ namespace xcread
   {
 	  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 2);
 	  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
-	  int cap = (int)KilogramsToGallons(ratio * total);
+	  int32_t cap = (int32_t)KilogramsToGallons(ratio * total);
 
 	  XCCopyMemory(target, &cap);
   }
 
   void PitchInput(unsigned char* target)
   {
-	  short ratio = (short)(GetFloat("sim/joystick/yoke_pitch_ratio") * 16383.0);
+	  int16_t ratio = (int16_t)(GetFloat("sim/joystick/yoke_pitch_ratio") * 16383.0);
 	  XCCopyMemory(target, &ratio);
   }
 
   void RollInput(unsigned char* target)
   {
-	  short ratio = (short)(GetFloat("sim/joystick/yoke_roll_ratio") * 16383.0);
+	  int16_t ratio = (int16_t)(GetFloat("sim/joystick/yoke_roll_ratio") * 16383.0);
 	  XCCopyMemory(target, &ratio);
   }
 
@@ -756,7 +744,7 @@ namespace xcread
 	  float fObs = GetFloat("sim/cockpit/radios/nav1_obs_degm");
 	  //fprintf(str, "Nav 1 obs: %f\n", fObs);
 
-	  short obs = (short)fObs;
+	  int16_t obs = (int16_t)fObs;
 	  XCCopyMemory(target, &obs);
 
 	  /*fObs = GetFloat("sim/cockpit/radios/nav1_obs_degt");
@@ -770,7 +758,7 @@ namespace xcread
 
   void NAV1Radial(unsigned char* target)
   {	// nav1 radial
-	  short bgn = (short)(WrapHeading(GetFloat("sim/cockpit2/radios/indicators/nav1_bearing_deg_mag") - 180) / 360.0 * 65536.0);
+	  int16_t bgn = (int16_t)(WrapHeading(GetFloat("sim/cockpit2/radios/indicators/nav1_bearing_deg_mag") - 180) / 360.0 * 65536.0);
 	  XCCopyMemory(target, &bgn);
   }
 
@@ -788,13 +776,13 @@ namespace xcread
 
   void NAV2OBS(unsigned char* target)
   {
-	  short obs = (short)GetFloat("sim/cockpit/radios/nav2_obs_degm");
+	  int16_t obs = (int16_t)GetFloat("sim/cockpit/radios/nav2_obs_degm");
 	  XCCopyMemory(target, &obs);
   }
 
   void NAV2Radial(unsigned char* target)
   {	// nav1 radial
-	  short bgn = (short)(WrapHeading(GetFloat("sim/cockpit2/radios/indicators/nav2_bearing_deg_mag") - 180) / 360.0 * 65536.0);
+	  int16_t bgn = (int16_t)(WrapHeading(GetFloat("sim/cockpit2/radios/indicators/nav2_bearing_deg_mag") - 180) / 360.0 * 65536.0);
 	  XCCopyMemory(target, &bgn);
   }
 
@@ -812,19 +800,19 @@ namespace xcread
 
   void Temp(unsigned char* target)
   {
-	  short oat = (short)(GetFloat("sim/weatcher/temperature_ambient_c") * 256.0);
+	  int16_t oat = (int16_t)(GetFloat("sim/weatcher/temperature_ambient_c") * 256.0);
 	  XCCopyMemory(target, &oat);
   }
 
   void WindSpeed(unsigned char* target)
   {	// wind speed
-	  short wsp = (short)GetFloat("sim/weather/wind_speed_kt");
+	  int16_t wsp = (int16_t)GetFloat("sim/weather/wind_speed_kt");
 	  XCCopyMemory(target, &wsp);
   }
 
   void WindDir(unsigned char* target)
   {	// wind direction
-	  short wdir = (short)(GetFloat("sim/weather/wind_direction_degt") / 360.0 * 65536);
+	  int16_t wdir = (int16_t)(GetFloat("sim/weather/wind_direction_degt") / 360.0 * 65536);
 	  XCCopyMemory(target, &wdir);
   }
 
@@ -842,7 +830,7 @@ namespace xcread
 
   void Eng1Throttle(unsigned char* target)
   {
-	  short thr = (short)(GetFloat("sim/flightmodel/engine/ENGN_thro", 0) * 16384.0);
+	  int16_t thr = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_thro", 0) * 16384.0);
 	  XCCopyMemory(target, &thr);
 
 
@@ -852,31 +840,31 @@ namespace xcread
 
   void Eng1Temp(unsigned char* target)
   {
-	  short egt = (short)(GetFloat("sim/cockpit2/engine/indicators/EGT_deg_C", 0) / 860.0 * 16384.0);
+	  int16_t egt = (int16_t)(GetFloat("sim/cockpit2/engine/indicators/EGT_deg_C", 0) / 860.0 * 16384.0);
 	  XCCopyMemory(target, &egt);
   }
 
   void Eng1OilPress(unsigned char* target)
   {
-	  short oilp = (short)(GetFloat("sim/flightmodel/engine/ENGN_oil_press_psi", 0) / 55.0 * 16384.0);
+	  int16_t oilp = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_press_psi", 0) / 55.0 * 16384.0);
 	  XCCopyMemory(target, &oilp);
   }
 
   void Eng1OilTemp(unsigned char* target)
   {
-	  short oilt = (short)(GetFloat("sim/flightmodel/engine/ENGN_oil_temp_c", 0) / 140.0 * 16384.0);
+	  int16_t oilt = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_temp_c", 0) / 140.0 * 16384.0);
 	  XCCopyMemory(target, &oilt);
   }
 
   void Eng1OilQty(unsigned char* target)
   {
-	  int oilq = (int)(GetFloat("sim/cockpit2/engine/indicators/oil_quantity_ratio", 0) * 16384.0);
+	  int32_t oilq = (int32_t)(GetFloat("sim/cockpit2/engine/indicators/oil_quantity_ratio", 0) * 16384.0);
 	  XCCopyMemory(target, &oilq);
   }
 
   void Eng1HydraulicQty(unsigned char* target)
   {
-	  int hydq = (int)(GetFloat("sim/cockpit/misc/hydraulic_quantity") / 100.0 * 16384.0);
+	  int32_t hydq = (int32_t)(GetFloat("sim/cockpit/misc/hydraulic_quantity") / 100.0 * 16384.0);
 	  XCCopyMemory(target, &hydq);
   }
 
@@ -888,25 +876,25 @@ namespace xcread
 
   void Eng2Throttle(unsigned char* target)
   {
-	  short thr = (short)(GetFloat("sim/flightmodel/engine/ENGN_thro", 1) * 16384.0);
+	  int16_t thr = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_thro", 1) * 16384.0);
 	  XCCopyMemory(target, &thr);
   }
 
   void Flaps1(unsigned char* target)
   {
-	  int flappos = (int)(GetFloat("sim/flightmodel2/controls/flap1_deploy_ratio") * 16383.0);
+	  int32_t flappos = (int32_t)(GetFloat("sim/flightmodel2/controls/flap1_deploy_ratio") * 16383.0);
 	  XCCopyMemory(target, &flappos);
   }
 
   void Flaps2(unsigned char* target)
   {
-	  int flappos = (int)(GetFloat("sim/flightmodel2/controls/flap2_deploy_ratio") * 16383.0);
+	  int32_t flappos = (int32_t)(GetFloat("sim/flightmodel2/controls/flap2_deploy_ratio") * 16383.0);
 	  XCCopyMemory(target, &flappos);
   }
 
   void MachSpeed(unsigned char* target)
   {
-	  short mach = (short)(GetFloat("sim/flightmodel/misc/machno") * 20480.0);
+	  int16_t mach = (int16_t)(GetFloat("sim/flightmodel/misc/machno") * 20480.0);
 	  XCCopyMemory(target, &mach);
   }
 
@@ -915,8 +903,8 @@ namespace xcread
 	  float oat = GetFloat("sim/weatcher/temperature_ambient_c");
 	  float mach = GetFloat("sim/flightmodel/misc/machno");
 
-	  float tat = oat * (1 + 0.2 * mach * mach) * 256.0;
-	  short sTat = (short)tat;
+	  float tat = oat * (1 + 0.2f * mach * mach) * 256.0f;
+	  int16_t sTat = (int16_t)tat;
 	  XCCopyMemory(target, &sTat);
   }
 
@@ -934,31 +922,31 @@ namespace xcread
 
   void Eng2Temp(unsigned char* target)
   {
-	  short egt = (short)(GetFloat("sim/cockpit2/engine/indicators/EGT_deg_C", 0) / 860.0 * 16384.0);
+	  int16_t egt = (int16_t)(GetFloat("sim/cockpit2/engine/indicators/EGT_deg_C", 0) / 860.0 * 16384.0);
 	  XCCopyMemory(target, &egt);
   }
 
   void Eng2OilPress(unsigned char* target)
   {
-	  short oilp = (short)(GetFloat("sim/flightmodel/engine/ENGN_oil_press_psi", 1) / 55.0 * 16384.0);
+	  int16_t oilp = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_press_psi", 1) / 55.0 * 16384.0);
 	  XCCopyMemory(target, &oilp);
   }
 
   void Eng2OilTemp(unsigned char* target)
   {
-	  short oilt = (short)(GetFloat("sim/flightmodel/engine/ENGN_oil_temp_c", 1) / 140.0 * 16384.0);
+	  int16_t oilt = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_temp_c", 1) / 140.0 * 16384.0);
 	  XCCopyMemory(target, &oilt);
   }
 
   void Eng2OilQty(unsigned char* target)
   {
-	  int oilq = (int)(GetFloat("sim/cockpit2/engine/indicators/oil_quantity_ratio", 1) * 16384.0);
+	  int32_t oilq = (int32_t)(GetFloat("sim/cockpit2/engine/indicators/oil_quantity_ratio", 1) * 16384.0);
 	  XCCopyMemory(target, &oilq);
   }
 
   void Eng2HydraulicQty(unsigned char* target)
   {
-	  int hydq = (int)(GetFloat("sim/cockpit/misc/hydraulic_quantity2") / 100.0 * 16384.0);
+	  int32_t hydq = (int32_t)(GetFloat("sim/cockpit/misc/hydraulic_quantity2") / 100.0 * 16384.0);
 	  XCCopyMemory(target, &hydq);
   }
 
@@ -1081,13 +1069,13 @@ namespace xcread
 		
 	  //fprintf(str, "Nav 1 freq: %d\n", freq);
 
-	  short res = (short)GetBCD(freq);
+	  int16_t res = (int16_t)GetBCD(freq);
 	  XCCopyMemory(target, &res);
   }
 
   void HeightAGL(unsigned char* target)
   {	// ground altitude
-	  int agl = (int)(GetFloat("sim/flightmodel/position/y_agl") * 65536.0);
+	  int32_t agl = (int32_t)(GetFloat("sim/flightmodel/position/y_agl") * 65536.0);
 	  XCCopyMemory(target, &agl);
   }
 
@@ -1103,7 +1091,7 @@ namespace xcread
 	  bool nav1hasdme = GetInt("sim/cockpit/radios/nav1_has_dme", 1) != 0;
 	  bool nav2hasdme = GetInt("sim/cockpit/radios/nav2_has_dme", 1) != 0;
 
-	  short ret = 0;
+	  int16_t ret = 0;
 
 	  if(goodnav1)
 		  ret += 2;
@@ -1127,44 +1115,44 @@ namespace xcread
 
   void XConnectVersion(unsigned char* target)
   {	// XConnect Version
-	  int version = 0x20000000;
+	  int32_t version = 0x20000000;
 	  XCCopyMemory(target, &version);
   }
 
   void XPlaneVersion(unsigned char* target)
   {	// X-Plane Version
-	  int version = 0xFADE0006;
+	  int32_t version = 0xFADE0006;
 	  XCCopyMemory(target, &version);
   }
 
   void PressureAltitude(unsigned char* target)
   {   // Barometric altitude
-	  int alt = (int)GetFloat("sim/flightmodel/misc/h_ind2");
+	  int32_t alt = (int32_t)GetFloat("sim/flightmodel/misc/h_ind2");
 	  XCCopyMemory(target, &alt);
   }
 
   void Eng1ThrottleInput(unsigned char* target)
   {
-	  short ratio = (short)(GetFloat("sim/cockpit2/engine/actuators/throttle_ratio",0) * 16384.0);
+	  int16_t ratio = (int16_t)(GetFloat("sim/cockpit2/engine/actuators/throttle_ratio",0) * 16384.0);
 	  XCCopyMemory(target, &ratio);
   }
 
   void Eng2ThrottleInput(unsigned char* target)
   {
-	  short ratio = (short)(GetFloat("sim/cockpit2/engine/actuators/throttle_ratio",1) * 16384.0);
+	  int16_t ratio = (int16_t)(GetFloat("sim/cockpit2/engine/actuators/throttle_ratio",1) * 16384.0);
 	  XCCopyMemory(target, &ratio);
   }
 
   void StandbyQNH(unsigned char* target)
   {
 	  float altimeter = GetFloat("sim/cockpit/misc/barometer_setting2");
-	  short sAlt = ((short)InchToHPA(altimeter)) * 16;
+	  int16_t sAlt = ((int16_t)InchToHPA(altimeter)) * 16;
 	  XCCopyMemory(target, &sAlt);
   }
 
   void StandbyAltitude(unsigned char* target)
   {
-	  int alt = (int)GetFloat("sim/flightmodel/misc/h_ind_copilot2");
+	  int32_t alt = (int32_t)GetFloat("sim/flightmodel/misc/h_ind_copilot2");
 	  XCCopyMemory(target, &alt);
   }
 

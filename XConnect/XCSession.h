@@ -42,7 +42,7 @@ typedef struct tagXC_ACTION_READ_HDR {
 	DWORD action;
 	DWORD offset;
 	DWORD size;
-	void* data;
+	DWORD data;
 } XC_ACTION_READ_HDR;
 
 typedef struct tagXC_ACTION_WRITE_HDR {
@@ -54,7 +54,7 @@ typedef struct tagXC_ACTION_WRITE_HDR {
 typedef struct tagXC_ACTION_READTOKEN_HDR {
 	DWORD action;
 	DWORD token;
-	void* data;
+	DWORD data;
 } XC_ACTION_READTOKEN_HDR;
 
 typedef struct tagXC_ACTION_WRITETOKEN_HDR {

@@ -42,7 +42,7 @@ extern "C"
      PLUGIN_API int XPluginEnable(void);
      PLUGIN_API void XPluginDisable(void);
      PLUGIN_API void XPluginStop(void);
-     PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void* inParam);
+     PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, void* inParam);
  #ifdef __cplusplus
 }
 #endif
@@ -96,7 +96,7 @@ PLUGIN_API void XPluginStop(void)
 	return;
 }
 
-PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void* inParam)
+PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, void* inParam)
 {
     return;
 }

@@ -17,6 +17,7 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "Common.h"
 #include "Conversion.h"
 #include <stdio.h>
+#include <stdint.h>
 
 
 void SetFloat(const char* dataRef, float value)
@@ -50,14 +51,14 @@ void WriteVariable(BYTE* source, DWORD offset, DWORD size)
 
 	if(offset==0x0330)
 	{
-		short val;
+		int16_t val;
 		CopyMemory(&val, source, size);
-		float fVal = HPAToInch(val / 16.0);
+		float fVal = HPAToInch(val / 16.0f);
 		SetFloat("sim/cockpit/misc/barometer_setting", fVal);
 	}
 	else if(offset==0x088C)
 	{
-		short val;
+		int16_t val;
 		CopyMemory(&val, source, size);
 
 		float fVal = val;
@@ -69,7 +70,7 @@ void WriteVariable(BYTE* source, DWORD offset, DWORD size)
 	}
 	else if(offset==0x0924)
 	{
-		short val;
+		int16_t val;
 		CopyMemory(&val, source, size);
 
 		float fVal = val;
@@ -85,9 +86,9 @@ void WriteVariable(BYTE* source, DWORD offset, DWORD size)
 		{
 			SetInt("sim/operation/override/override_joystick_pitch", 1);
 
-			short val;
+			int16_t val;
 			CopyMemory(&val, source, size);
-			float ratio = val / 16383.0;
+			float ratio = val / 16383.0f;
 			SetFloat("sim/joystick/yoke_pitch_ratio", ratio);
 		}
 		else
@@ -99,9 +100,9 @@ void WriteVariable(BYTE* source, DWORD offset, DWORD size)
 		{
 			SetInt("sim/operation/override/override_joystick_roll", 1);
 
-			short val;
+			int16_t val;
 			CopyMemory(&val, source, size);
-			float ratio = val / 16383.0;
+			float ratio = val / 16383.0f;
 			SetFloat("sim/joystick/yoke_roll_ratio", ratio);
 		}
 		else
@@ -112,7 +113,7 @@ void WriteVariable(BYTE* source, DWORD offset, DWORD size)
 	
 	else if(offset==0x0C4E)
 	{
-		short val;
+		int16_t val;
 		CopyMemory(&val, source, size);
 		SetFloat("sim/cockpit/radios/nav1_obs_degm", (float)val);
 	
@@ -122,15 +123,15 @@ void WriteVariable(BYTE* source, DWORD offset, DWORD size)
 	}
 	else if(offset==0x0C5E)
 	{
-		short val;
+		int16_t val;
 		CopyMemory(&val, source, size);
 		SetFloat("sim/cockpit/radios/nav2_obs_degm", (float)val);
 	}
 	else if(offset==0x3542)
 	{
-		short val;
+		int16_t val;
 		CopyMemory(&val, source, size);
-		float fVal = HPAToInch(val / 16.0);
+		float fVal = HPAToInch(val / 16.0f);
 		SetFloat("sim/cockpit/misc/barometer_setting2", fVal);	
 	}
 	else if(offset==0x310A)

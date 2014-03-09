@@ -17,38 +17,38 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 
 float KgToLbs(float kg)
 {
-	return kg / 0.45359237;
+	return kg / 0.45359237f;
 }
 
 float InchToHPA(float inch)
 {
 
-		float diff = (inch - 29.92) / 0.02952998;
+		float diff = (inch - 29.92f) / 0.02952998f;
 		return 1013 + diff;
 
 }
 
 float HPAToInch(float hpa)
 {
-	float diff = (hpa - 1013) * 0.02952998;
+	float diff = (hpa - 1013) * 0.02952998f;
 
-    return 29.92 + diff;
+    return 29.92f + diff;
 }
 
 float MetersToKnot(float meters)
 {
-	return meters * 1.9438444924406;
+	return meters * 1.9438444924406f;
 }
 
 float KilogramsToGallons(float kg)
 {
 	float lbs = KgToLbs(kg);
-	return lbs / 6.699219;
+	return lbs / 6.699219f;
 }
 
 float LbsToKg(float lbs)
 {
-	return lbs * 0.45359237;
+	return lbs * 0.45359237f;
 }
 
 int GetBCD(int orig)

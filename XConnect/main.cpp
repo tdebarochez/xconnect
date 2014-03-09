@@ -27,7 +27,7 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "XCSession.h"
 #include "main.h"
 
-const char* version = "0.0.1";
+const char* version = "0.1.1";
 
 #if IBM
 #include <windows.h>
@@ -42,7 +42,7 @@ extern "C"
      PLUGIN_API int XPluginEnable(void);
      PLUGIN_API void XPluginDisable(void);
      PLUGIN_API void XPluginStop(void);
-     PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void* inParam);
+     PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, void* inParam);
  #ifdef __cplusplus
 }
 #endif
@@ -74,7 +74,7 @@ PLUGIN_API int XPluginStart(char* name, char* signature, char* description)
 {
 
 	strcpy(name, "XConnect");
-	strcpy(signature, "FDSoft.XConnect");
+	strcpy(signature, "Oktalist.XConnect");
 	strcpy(description, "Provides the same functionality as FSUIPC");
 	module_init(hDLLInstance);
 	return 1;
@@ -96,7 +96,7 @@ PLUGIN_API void XPluginStop(void)
 	return;
 }
 
-PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, long inMessage, void* inParam)
+PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, void* inParam)
 {
     return;
 }

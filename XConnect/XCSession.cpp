@@ -41,7 +41,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	if((message == XC_CALL) || (message == XCModuleCallMessage)) 
 	{
-		HANDLE hMap = 0;
+        HANDLE hMap = 0;
 		BYTE* pView = NULL;
 		BYTE* pNext = NULL;
 		XC_ACTION_READ_HDR* pHdrR = NULL;
@@ -55,12 +55,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		ATOM atom = wParam;
 		LRESULT result = XC_RETURN_FAILURE;
 
+	    FILE* str = fopen("XConnect.out", "a+");
+        fprintf(str, "sizeof(XC_ACTION_READ_HDR)=%d\n", (int)sizeof(XC_ACTION_READ_HDR));
+	    if (message == XC_CALL) fprintf(str, "XC_CALL");
+	    if (message == XCModuleCallMessage) fprintf(str, "XCModuleCallMessage");
+        fprintf(str, " W=%d L=%p\n", (int)wParam, (void*)lParam);
+
 		if (message == XCModuleCallMessage) {
 			hMap = (BYTE*)lParam;
 		}
 		else {
 			GlobalGetAtomName(atom, (LPWSTR)szName, MAX_PATH);
 			hMap = OpenFileMapping(FILE_MAP_WRITE, FALSE, (LPWSTR)szName);
+
+            MEMORY_BASIC_INFORMATION info;
+            VirtualQuery(hMap, &info, sizeof(info));
+            fprintf(str, "FileMapping RegionSize=%d\n", (int)info.RegionSize);
 		}
 
 		if (hMap) {
@@ -74,6 +84,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				pdw = (DWORD*)pView;
 				while ((*pdw) && (result == XC_RETURN_SUCCESS))  {	
+                    switch (*pdw) {
+                    case XC_ACTION_READ:        fprintf(str, "  XC_ACTION_READ\n"); break;
+                    case XC_ACTION_READTRUE:    fprintf(str, "  XC_ACTION_READTRUE\n"); break;
+                    case XC_ACTION_WRITE:       fprintf(str, "  XC_ACTION_WRITE\n"); break;
+                    case XC_ACTION_WRITETRUE:   fprintf(str, "  XC_ACTION_WRITETRUE\n"); break;
+                    case XC_ACTION_READTOKEN:   fprintf(str, "  XC_ACTION_READTOKEN\n"); break;
+                    case XC_ACTION_WRITETOKEN:  fprintf(str, "  XC_ACTION_WRITETOKEN\n"); break;
+                    case XC_ACTION_SEARCH:      fprintf(str, "  XC_ACTION_SEARCH\n"); break;
+                    }
 					switch (*pdw) {
 						case XC_ACTION_READ:
 						case XC_ACTION_READTRUE:
@@ -233,6 +252,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				CloseHandle(hMap);
 		}
 
+	    fclose(str);
 		return result;
 
 	}
