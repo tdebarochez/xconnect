@@ -1,0 +1,7 @@
+INCLUDEPATH += $$SDKDIR/CHeaders/XPLM
+DEFINES += IBM
+CONFIG(shared, static|shared) {
+	LIBS += -L$$SDKDIR/Libraries/Win
+	contains(QMAKE_TARGET.arch, x86_64): LIBS += -lXPLM_64
+	else:                                LIBS += -lXPLM
+}

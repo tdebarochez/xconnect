@@ -1,0 +1,6 @@
+INCLUDEPATH += $$SDKDIR/CHeaders/XPLM
+DEFINES += APL
+CONFIG(shared, static|shared) {
+	LIBS += -L$$SDKDIR/Libraries/Mac -framework XPLM \
+		-framework Cocoa -framework CoreFoundation
+}
