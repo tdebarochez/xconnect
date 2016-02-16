@@ -13,8 +13,6 @@ You should have received a copy of the GNU Lesser General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 #include <stdio.h>
 #include "SocketServer.h"
 #include "XCSession.h"
@@ -23,35 +21,28 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 DWORD dwThreadId;
 HANDLE hThread;
 
-void module_init(HINSTANCE dllInstance)
-{
-	FILE* str = fopen("XCOnnectServer.out", "w");
-	fprintf(str, "XConnectServer init OK!\n");
+void module_init(HINSTANCE dllInstance) {
+  FILE *str = fopen("XCOnnectServer.out", "w");
+  fprintf(str, "XConnectServer init OK!\n");
 
+  XConnectMemBlock = new BYTE[0x10000];
 
-	XConnectMemBlock = new BYTE[0x10000];
+  for (int i = 0; i < 0x10000; i++) {
+    XConnectMemBlock[i] = 0;
+  }
 
-	for (int i = 0; i < 0x10000; i++) {
-		XConnectMemBlock[i] = 0;
-	}
+  // InitializeCriticalSection(&GDILock);
+  hThread = CreateThread(NULL, // no security attribute
+                         0,    // default stack size
+                         (LPTHREAD_START_ROUTINE)SocketServer,
+                         (LPVOID)0,    // thread parameter
+                         0,            // not suspended
+                         &dwThreadId); // returns thread ID
 
-	//InitializeCriticalSection(&GDILock);
-    hThread = CreateThread( 
-            NULL,				// no security attribute 
-            0,					// default stack size 
-            (LPTHREAD_START_ROUTINE) SocketServer,
-            (LPVOID) 0,			// thread parameter 
-            0,					// not suspended 
-            &dwThreadId);		// returns thread ID
-	
-	if (hThread)
-		fprintf(str, "Create thread OK!\n");
+  if (hThread)
+    fprintf(str, "Create thread OK!\n");
 
-	fclose(str);
+  fclose(str);
 }
 
-void module_deinit()
-{
-	CloseHandle(hThread);
-
-}
+void module_deinit() { CloseHandle(hThread); }

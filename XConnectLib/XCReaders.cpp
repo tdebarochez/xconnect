@@ -20,1140 +20,1052 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdint.h>
 
-XPLMDataRef GetDataRef(const char* dataRef)
-{
-	XPLMDataRef intvar;
+XPLMDataRef GetDataRef(const char *dataRef) {
+  XPLMDataRef intvar;
 
-	StringMap::iterator it = VarMap.find(dataRef);
+  StringMap::iterator it = VarMap.find(dataRef);
 
-	if(it==VarMap.end())
-	{
-		intvar = XPLMFindDataRef(dataRef);
-		VarMap[dataRef] = intvar;
-	}
-	else
-	{
-		intvar = it->second;
-	}
+  if (it == VarMap.end()) {
+    intvar = XPLMFindDataRef(dataRef);
+    VarMap[dataRef] = intvar;
+  } else {
+    intvar = it->second;
+  }
 
-	//intvar = XPLMFindDataRef(dataRef);
-	return intvar;
-
+  // intvar = XPLMFindDataRef(dataRef);
+  return intvar;
 }
 
-float GetFloat(const char* dataRef)
-{
-	XPLMDataRef intvar = GetDataRef(dataRef);
-	
-	return XPLMGetDataf(intvar);
+float GetFloat(const char *dataRef) {
+  XPLMDataRef intvar = GetDataRef(dataRef);
+
+  return XPLMGetDataf(intvar);
 }
 
-int GetInt(const char* dataRef)
-{
-	XPLMDataRef intvar;
-	intvar = XPLMFindDataRef(dataRef);
-	return XPLMGetDatai(intvar);
+int GetInt(const char *dataRef) {
+  XPLMDataRef intvar;
+  intvar = XPLMFindDataRef(dataRef);
+  return XPLMGetDatai(intvar);
 }
 
-double GetDouble(const char* dataRef)
-{
+double GetDouble(const char *dataRef) {
 
-	XPLMDataRef intvar;
-	intvar = XPLMFindDataRef(dataRef);
-	return XPLMGetDatad(intvar);
+  XPLMDataRef intvar;
+  intvar = XPLMFindDataRef(dataRef);
+  return XPLMGetDatad(intvar);
 }
 
-float GetFloat(const char* dataRef, int offset)
-{
-	XPLMDataRef intvar;
-	intvar = XPLMFindDataRef(dataRef);
+float GetFloat(const char *dataRef, int offset) {
+  XPLMDataRef intvar;
+  intvar = XPLMFindDataRef(dataRef);
 
-	float ret;
+  float ret;
 
-	XPLMGetDatavf(intvar, &ret, offset, 1);
+  XPLMGetDatavf(intvar, &ret, offset, 1);
 
-	return ret;
+  return ret;
 }
-int GetInt(const char* dataRef, int offset)
-{
-	XPLMDataRef intvar;
-	intvar = XPLMFindDataRef(dataRef);
+int GetInt(const char *dataRef, int offset) {
+  XPLMDataRef intvar;
+  intvar = XPLMFindDataRef(dataRef);
 
-	int ret;
+  int ret;
 
-	XPLMGetDatavi(intvar, &ret, offset, 1);
+  XPLMGetDatavi(intvar, &ret, offset, 1);
 
-	return ret;
-	
+  return ret;
 }
 
-namespace xcread
-{
+namespace xcread {
 
-  void GroundElev(unsigned char* target)
-  {	// Ground altitude meters x 256
+void GroundElev(unsigned char *target) { // Ground altitude meters x 256
 
-	  float agl = GetFloat("sim/flightmodel/position/y_agl");
-	  float msl = GetFloat("sim/flightmodel/position/elevation");
+  float agl = GetFloat("sim/flightmodel/position/y_agl");
+  float msl = GetFloat("sim/flightmodel/position/elevation");
 
-	  int32_t ga = (int32_t)((msl - agl) * 256.0);
+  int32_t ga = (int32_t)((msl - agl) * 256.0);
 
-	  XCCopyMemory(target, &ga);
-  }
-	
-  void HoursLocal(unsigned char* target)
-  {	// Hour local
-
-	  float sec = GetFloat("sim/time/local_time_sec");
-	  int iSec = (int)(sec / 3600);
-	  char cSec = (char)iSec;
-	  XCCopyMemory(target, &cSec);
-  }
-
-  void MinsLocal(unsigned char* target)
-  {	// minute
-	  float sec = GetFloat("sim/time/local_time_sec");
-	  int iHour = (int)(sec / 3600);
-	  sec -= iHour * 3600;
-	  int min = (int)(sec / 60);
-
-	  char cMin = (char)min;
-
-	  XCCopyMemory(target, &cMin);
-  }
-
-  void SecsLocal(unsigned char* target)
-  {	// second
-	  float sec = GetFloat("sim/time/local_time_sec");
-	  int iHour = (int)(sec / 3600);
-	  sec -= iHour * 3600;
-	  int min = (int)(sec / 60);
-	  sec -= min * 60;
-	  char cSec = (char)sec;
-
-	  XCCopyMemory(target, &cSec);
-  }
-
-  void HoursZulu(unsigned char* target)
-  {	// Hour zulu
-
-	  //fprintf(str, "Read hour\n");
-
-		
-	  float sec = GetFloat("sim/time/zulu_time_sec");
-
-	  //fprintf(str, "Hour: %f\n", sec);
-
-	  int iSec = (int)(sec / 3600);
-	  char cSec = (char)iSec;
-
-	  //fprintf(str, "Hour: %d\n", iSec);
-
-	  XCCopyMemory(target, &cSec);
-  }
-
-  void MinutesZulu(unsigned char* target)
-  {	// minute zulu
-	  float sec = GetFloat("sim/time/zulu_time_sec");
-	  int iHour = (int)(sec / 3600);
-	  sec -= iHour * 3600;
-	  int min = (int)(sec / 60);
-
-	  char cMin = (char)min;
-
-	  XCCopyMemory(target, &cMin);
-  }
-
-  void DayOfYear(unsigned char* target)
-  {	// day in year
-
-	  int day = GetInt("sim/time/local_date_days");
-	  int16_t sDay = (int16_t)day;
-	  XCCopyMemory(target, &sDay);
-  }
-
-  void Paused(unsigned char* target)
-  {   // Paused
-	  int pause = GetInt("sim/time/paused");
-	  int16_t sPause = (int16_t)pause;
-	  XCCopyMemory(target, &sPause);
-  }
-
-  void MagVar(unsigned char* target)
-  {   // mag var
-	  float magvar = GetFloat("sim/flightmodel/position/magnetic_variation") / 360.0f * 65536;
-	  int16_t sMagVar = -(int16_t)magvar;
-	  XCCopyMemory(target, &sMagVar);
-  }
-
-  void GS(unsigned char* target)
-  {	// Ground speed
-
-	  float gs = GetFloat("sim/flightmodel/position/groundspeed") * 65536.0f;
-	  uint32_t iGS = (uint32_t)gs;
-
-	  XCCopyMemory(target, &iGS);
-
-  }
-
-  void TAS(unsigned char* target)
-  {	// TAS
-
-	  float ias = MetersToKnot(GetFloat("sim/flightmodel/position/true_airspeed") * 128.0f);
-
-	  //fprintf(str, "TAS: %e\n", ias);
-	  uint32_t iIAS = (uint32_t)ias;
-
-	  XCCopyMemory(target, &iIAS);
-  }
-
-  void IAS(unsigned char* target)
-  {	// IAS
-
-	  float ias = GetFloat("sim/flightmodel/position/indicated_airspeed2") * 128.0f;
-	  int32_t iIAS = (int32_t)ias;
-
-	  XCCopyMemory(target, &iIAS);
-  }
-
-  void VS(unsigned char* target)
-  {	// vertical speed
-	  float vs = GetFloat("sim/cockpit2/gauges/indicators/vvi_fpm_pilot");
-	  vs = vs / 60.0f / 3.28084f * 256;
-	  int32_t iVs = (int32_t)vs;
-	  XCCopyMemory(target, &iVs);
-  }	
-
-  void ADF2Freq(unsigned char* target)
-  {	// adf2 freq
-	  int freq = GetInt("sim/cockpit/radios/adf2_freq_hz");
-		
-	  int16_t res = (int16_t)GetBCD(freq);
-	  XCCopyMemory(target, &res);
-  }
-
-  void Nav2Info(unsigned char* target)
-  {   // nav2 identity
-	  int freq = GetInt("sim/cockpit/radios/adf2_freq_hz");
-	  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
-	  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
-
-	  /*fprintf(str, "Freq: %d\n", freq);
-	  fprintf(str, "Lat: %f\n", latitude);
-	  fprintf(str, "Lon: %f\n", longitude);*/
-
-	  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 2);
-
-	  char buf[6];
-	  for(int i = 0;i<6;i++)
-		  buf[i] = 0;
-
-
-	  if(ref != XPLM_NAV_NOT_FOUND)
-	  {
-		  XPLMGetNavAidInfo(ref, 
-							  NULL,	// type
-							  &latitude,	// lat
-							  &longitude,	// lon
-							  NULL,	// height
-							  &freq,	// freq
-							  NULL,	// heading
-							  buf,	// ID
-							  NULL,	// name
-							  NULL);	// reg
-	  }
-
-	  CopyMemory(target, buf, 6);
-
-  }
-
-  void QNH(unsigned char* target)
-  {	// altimeter
-	  float altimeter = GetFloat("sim/cockpit/misc/barometer_setting");
-	  int16_t sAlt = ((int16_t)InchToHPA(altimeter)) * 16;
-	  XCCopyMemory(target, &sAlt);
-  }
-
-  void Transponder(unsigned char* target)
-  {
-	  int16_t xpdr = GetInt("sim/cockpit/radios/transponder_code");
-	  int16_t bcd = GetBCD(xpdr);
-	  XCCopyMemory(target, &xpdr);
-  }
-
-  void OnGround(unsigned char* target)
-  {
-	  float agl = GetFloat("sim/flightmodel/position/y_agl");
-	  int16_t onground = 0;
-	  if(agl<4)
-	  {
-		  onground = 1;
-	  }
-	  XCCopyMemory(target, &onground);
-  }
-
-  void ADF1Freq(unsigned char* target)
-  {	// adf1 freq
-	  int freq = GetInt("sim/cockpit/radios/adf1_freq_hz");
-		
-	  int16_t res = (int16_t)GetBCD(freq);
-	  XCCopyMemory(target, &res);
-  }
+  XCCopyMemory(target, &ga);
+}
 
-  void COM1Freq(unsigned char* target)
-  {	// com1 freq
-	  int freq = GetInt("sim/cockpit/radios/com1_freq_hz") - 10000;
-		
-	  //fprintf(str, "Nav 1 freq: %d\n", freq);
-
-	  int16_t res = (int16_t)GetBCD(freq);
-	  XCCopyMemory(target, &res);
-  }
-
-  void NAV1Freq(unsigned char* target)
-  {	// nav1 freq
-	  int freq = GetInt("sim/cockpit/radios/nav1_freq_hz") - 10000;
-		
-	  //fprintf(str, "Nav 1 freq: %d\n", freq);
-
-	  int16_t res = (int16_t)GetBCD(freq);
-	  XCCopyMemory(target, &res);
-  }
-
-  void NAV2Freq(unsigned char* target)
-  {	// nav2 freq
-	  int freq = GetInt("sim/cockpit/radios/nav2_freq_hz") - 10000;
-		
-	  int16_t res = (int16_t)GetBCD(freq);
-	  XCCopyMemory(target, &res);
-  }
-
-  void LatitudeHi(unsigned char* target)
-  {
-	  double latitude = GetDouble("sim/flightmodel/position/latitude");
-
-	  latitude = latitude * (10001750.0 * 65536.0 * 65536.0) / 90.0;
-
-	  int64_t lLat = (int64_t) latitude;
-
-	  BYTE* lTarget = XConnectMemBlock;
-	  lTarget += 0x0560;
+void HoursLocal(unsigned char *target) { // Hour local
 
-	  uint32_t dLo = ((uint32_t*)&lLat)[1];
-	  uint32_t dHi = ((uint32_t*)&lLat)[0];
+  float sec = GetFloat("sim/time/local_time_sec");
+  int iSec = (int)(sec / 3600);
+  char cSec = (char)iSec;
+  XCCopyMemory(target, &cSec);
+}
 
-	  XCCopyMemory(lTarget, &lLat);
+void MinsLocal(unsigned char *target) { // minute
+  float sec = GetFloat("sim/time/local_time_sec");
+  int iHour = (int)(sec / 3600);
+  sec -= iHour * 3600;
+  int min = (int)(sec / 60);
 
-	  XCCopyMemory(target, &dHi);
-  }
-
-  void LatitudeLo(unsigned char* target)
-  {
-	  double latitude = GetDouble("sim/flightmodel/position/latitude");
-
-	  latitude = latitude * (10001750.0 * 65536.0 * 65536.0) / 90.0;
-
-	  int64_t lLat = (int64_t) latitude;
-
-	  BYTE* lTarget = XConnectMemBlock;
-	  lTarget += 0x0560;
+  char cMin = (char)min;
 
-	  uint32_t dLo = ((uint32_t*)&lLat)[1];
-	  uint32_t dHi = ((uint32_t*)&lLat)[0];
+  XCCopyMemory(target, &cMin);
+}
 
-	  XCCopyMemory(lTarget, &lLat);
+void SecsLocal(unsigned char *target) { // second
+  float sec = GetFloat("sim/time/local_time_sec");
+  int iHour = (int)(sec / 3600);
+  sec -= iHour * 3600;
+  int min = (int)(sec / 60);
+  sec -= min * 60;
+  char cSec = (char)sec;
 
-	  XCCopyMemory(target, &dLo);
-  }
+  XCCopyMemory(target, &cSec);
+}
 
-  void LongitudeHi(unsigned char* target)
-  {
-	  double longitude = GetDouble("sim/flightmodel/position/longitude");
+void HoursZulu(unsigned char *target) { // Hour zulu
 
-	  longitude = longitude * (65536.0 * 65536.0 * 65536.0 * 65536.0) / 360.0;
+  // fprintf(str, "Read hour\n");
 
-	  int64_t lLon = (int64_t)longitude;
-		
-	  BYTE* lTarget = XConnectMemBlock;
-	  lTarget += 0x0568;
+  float sec = GetFloat("sim/time/zulu_time_sec");
 
-	  uint32_t dLo = ((uint32_t*)&lLon)[1];
-	  uint32_t dHi = ((uint32_t*)&lLon)[0];
+  // fprintf(str, "Hour: %f\n", sec);
 
-	  XCCopyMemory(lTarget, &lLon);
+  int iSec = (int)(sec / 3600);
+  char cSec = (char)iSec;
 
-	  XCCopyMemory(target, &dHi);
-  }
+  // fprintf(str, "Hour: %d\n", iSec);
 
-  void LongitudeLo(unsigned char* target)
-  {
-	  double longitude = GetDouble("sim/flightmodel/position/longitude");
+  XCCopyMemory(target, &cSec);
+}
 
-	  longitude = longitude * (65536.0 * 65536.0 * 65536.0 * 65536.0) / 360.0;
+void MinutesZulu(unsigned char *target) { // minute zulu
+  float sec = GetFloat("sim/time/zulu_time_sec");
+  int iHour = (int)(sec / 3600);
+  sec -= iHour * 3600;
+  int min = (int)(sec / 60);
 
-	  int64_t lLon = (int64_t)longitude;
-		
-	  BYTE* lTarget = XConnectMemBlock;
-	  lTarget += 0x0568;
+  char cMin = (char)min;
 
-	  uint32_t dLo = ((uint32_t*)&lLon)[1];
-	  uint32_t dHi = ((uint32_t*)&lLon)[0];
+  XCCopyMemory(target, &cMin);
+}
 
-	  XCCopyMemory(lTarget, &lLon);
+void DayOfYear(unsigned char *target) { // day in year
 
-	  XCCopyMemory(target, &dLo);
-  }
+  int day = GetInt("sim/time/local_date_days");
+  int16_t sDay = (int16_t)day;
+  XCCopyMemory(target, &sDay);
+}
 
-  void Altitude(unsigned char* target)
-  {
-	  double elevation = GetDouble("sim/flightmodel/position/elevation");
+void Paused(unsigned char *target) { // Paused
+  int pause = GetInt("sim/time/paused");
+  int16_t sPause = (int16_t)pause;
+  XCCopyMemory(target, &sPause);
+}
 
-	  int64_t lAlt = (int64_t)(elevation * 65536.0 * 65536.0);
+void MagVar(unsigned char *target) { // mag var
+  float magvar =
+      GetFloat("sim/flightmodel/position/magnetic_variation") / 360.0f * 65536;
+  int16_t sMagVar = -(int16_t)magvar;
+  XCCopyMemory(target, &sMagVar);
+}
 
-	  XCCopyMemory(target, &lAlt);
-  }
+void GS(unsigned char *target) { // Ground speed
 
-  void Pitch(unsigned char* target)
-  {	// pitch
-	  float pitch = GetFloat("sim/flightmodel/position/theta");
-	  pitch = pitch / 360.0f * (65536.0f * 65536.0f);
-	  int32_t iPitch = (int32_t)-pitch;
-	  XCCopyMemory(target, &iPitch);
-  }
+  float gs = GetFloat("sim/flightmodel/position/groundspeed") * 65536.0f;
+  uint32_t iGS = (uint32_t)gs;
 
-  void Roll(unsigned char* target)
-  {	// bank
-	  float bank = GetFloat("sim/flightmodel/position/phi");
-	  bank = bank / 360.0f * (65536.0f * 65536.0f);
-	  int32_t iBank = (int32_t)-bank;
-	  XCCopyMemory(target, &iBank);
-  }
+  XCCopyMemory(target, &iGS);
+}
 
-  void Heading(unsigned char* target)
-  {	// heading
-	  double hdg = (double)GetFloat("sim/flightmodel/position/psi");
+void TAS(unsigned char *target) { // TAS
 
-	  hdg = hdg / 360.0 * (65536.0 * 65536.0);
+  float ias =
+      MetersToKnot(GetFloat("sim/flightmodel/position/true_airspeed") * 128.0f);
 
-	  //fprintf(str, "Heading: %e\n", hdg);
+  // fprintf(str, "TAS: %e\n", ias);
+  uint32_t iIAS = (uint32_t)ias;
 
-	  uint32_t iHdg = (uint32_t)hdg;
+  XCCopyMemory(target, &iIAS);
+}
 
-	  //fprintf(str, "Heading int: %d\n", iHdg);
-	  XCCopyMemory(target, &iHdg);
-  }
+void IAS(unsigned char *target) { // IAS
 
-  void NAV2RwyHdg(unsigned char* target)
-  {	// runway heading nav2
-	  int16_t crs = (int16_t)(WrapHeading(GetFloat("sim/cockpit/radios/nav2_course_degm") + 180) / 360.0 * 65536.0);
-	  XCCopyMemory(target, &crs);
-  }
+  float ias = GetFloat("sim/flightmodel/position/indicated_airspeed2") * 128.0f;
+  int32_t iIAS = (int32_t)ias;
 
-  void NAV2Latitude(unsigned char* target)
-  {
-	  int freq = GetInt("sim/cockpit/radios/nav2_freq_hz");
-	  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
-	  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
+  XCCopyMemory(target, &iIAS);
+}
 
-	  /*fprintf(str, "Freq: %d\n", freq);
-	  fprintf(str, "Lat: %f\n", latitude);
-	  fprintf(str, "Lon: %f\n", longitude);*/
+void VS(unsigned char *target) { // vertical speed
+  float vs = GetFloat("sim/cockpit2/gauges/indicators/vvi_fpm_pilot");
+  vs = vs / 60.0f / 3.28084f * 256;
+  int32_t iVs = (int32_t)vs;
+  XCCopyMemory(target, &iVs);
+}
 
-	  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
+void ADF2Freq(unsigned char *target) { // adf2 freq
+  int freq = GetInt("sim/cockpit/radios/adf2_freq_hz");
 
+  int16_t res = (int16_t)GetBCD(freq);
+  XCCopyMemory(target, &res);
+}
 
-	  char buf[6];
-	  for(int i = 0;i<6;i++)
-		  buf[i] = 0;
+void Nav2Info(unsigned char *target) { // nav2 identity
+  int freq = GetInt("sim/cockpit/radios/adf2_freq_hz");
+  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
+  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
 
+  /*fprintf(str, "Freq: %d\n", freq);
+  fprintf(str, "Lat: %f\n", latitude);
+  fprintf(str, "Lon: %f\n", longitude);*/
 
-	  if(ref != XPLM_NAV_NOT_FOUND)
-	  {
-		  XPLMGetNavAidInfo(ref, 
-							  NULL,	// type
-							  &latitude,	// lat
-							  &longitude,	// lon
-							  NULL,	// height
-							  &freq,	// freq
-							  NULL,	// heading
-							  buf,	// ID
-							  NULL,	// name
-							  NULL);	// reg
-	  }
+  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 2);
 
-	  int32_t lat = (int32_t)(latitude / 90.0 * 10001750.0);
+  char buf[6];
+  for (int i = 0; i < 6; i++)
+    buf[i] = 0;
 
-	  XCCopyMemory(target, &lat);
+  if (ref != XPLM_NAV_NOT_FOUND) {
+    XPLMGetNavAidInfo(ref,
+                      NULL,       // type
+                      &latitude,  // lat
+                      &longitude, // lon
+                      NULL,       // height
+                      &freq,      // freq
+                      NULL,       // heading
+                      buf,        // ID
+                      NULL,       // name
+                      NULL);      // reg
   }
-
-  void NAV1Latitude(unsigned char* target)
-  {
-	  int freq = GetInt("sim/cockpit/radios/nav1_freq_hz");
-	  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
-	  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
 
-	  /*fprintf(str, "Freq: %d\n", freq);
-	  fprintf(str, "Lat: %f\n", latitude);
-	  fprintf(str, "Lon: %f\n", longitude);*/
+  CopyMemory(target, buf, 6);
+}
 
-	  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
+void QNH(unsigned char *target) { // altimeter
+  float altimeter = GetFloat("sim/cockpit/misc/barometer_setting");
+  int16_t sAlt = ((int16_t)InchToHPA(altimeter)) * 16;
+  XCCopyMemory(target, &sAlt);
+}
 
+void Transponder(unsigned char *target) {
+  int16_t xpdr = GetInt("sim/cockpit/radios/transponder_code");
+  int16_t bcd = GetBCD(xpdr);
+  XCCopyMemory(target, &xpdr);
+}
 
-	  char buf[6];
-	  for(int i = 0;i<6;i++)
-		  buf[i] = 0;
-
-
-	  if(ref != XPLM_NAV_NOT_FOUND)
-	  {
-		  XPLMGetNavAidInfo(ref, 
-							  NULL,	// type
-							  &latitude,	// lat
-							  &longitude,	// lon
-							  NULL,	// height
-							  &freq,	// freq
-							  NULL,	// heading
-							  buf,	// ID
-							  NULL,	// name
-							  NULL);	// reg
-	  }
-
-	  int32_t lat = (int32_t)(latitude / 90.0 * 10001750.0);
-
-	  XCCopyMemory(target, &lat);
+void OnGround(unsigned char *target) {
+  float agl = GetFloat("sim/flightmodel/position/y_agl");
+  int16_t onground = 0;
+  if (agl < 4) {
+    onground = 1;
   }
-
-  void NAV2Longitude(unsigned char* target)
-  {
-	  int freq = GetInt("sim/cockpit/radios/nav2_freq_hz");
-	  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
-	  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
+  XCCopyMemory(target, &onground);
+}
 
-	  /*fprintf(str, "Freq: %d\n", freq);
-	  fprintf(str, "Lat: %f\n", latitude);
-	  fprintf(str, "Lon: %f\n", longitude);*/
+void ADF1Freq(unsigned char *target) { // adf1 freq
+  int freq = GetInt("sim/cockpit/radios/adf1_freq_hz");
 
-	  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
+  int16_t res = (int16_t)GetBCD(freq);
+  XCCopyMemory(target, &res);
+}
 
+void COM1Freq(unsigned char *target) { // com1 freq
+  int freq = GetInt("sim/cockpit/radios/com1_freq_hz") - 10000;
 
-	  char buf[6];
-	  for(int i = 0;i<6;i++)
-		  buf[i] = 0;
+  // fprintf(str, "Nav 1 freq: %d\n", freq);
 
+  int16_t res = (int16_t)GetBCD(freq);
+  XCCopyMemory(target, &res);
+}
 
-	  if(ref != XPLM_NAV_NOT_FOUND)
-	  {
-		  XPLMGetNavAidInfo(ref, 
-							  NULL,	// type
-							  &latitude,	// lat
-							  &longitude,	// lon
-							  NULL,	// height
-							  &freq,	// freq
-							  NULL,	// heading
-							  buf,	// ID
-							  NULL,	// name
-							  NULL);	// reg
-	  }
+void NAV1Freq(unsigned char *target) { // nav1 freq
+  int freq = GetInt("sim/cockpit/radios/nav1_freq_hz") - 10000;
 
-	  int32_t lon = (int32_t)(longitude / 360.0 * (65536.0 * 65536.0));
+  // fprintf(str, "Nav 1 freq: %d\n", freq);
 
-	  XCCopyMemory(target, &lon);
-  }
-
-  void NAV1Longitude(unsigned char* target)
-  {
-	  int freq = GetInt("sim/cockpit/radios/nav1_freq_hz");
-	  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
-	  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
-
-	  /*fprintf(str, "Freq: %d\n", freq);
-	  fprintf(str, "Lat: %f\n", latitude);
-	  fprintf(str, "Lon: %f\n", longitude);*/
-
-	  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
+  int16_t res = (int16_t)GetBCD(freq);
+  XCCopyMemory(target, &res);
+}
 
+void NAV2Freq(unsigned char *target) { // nav2 freq
+  int freq = GetInt("sim/cockpit/radios/nav2_freq_hz") - 10000;
 
-	  char buf[6];
-	  for(int i = 0;i<6;i++)
-		  buf[i] = 0;
-
-
-	  if(ref != XPLM_NAV_NOT_FOUND)
-	  {
-		  XPLMGetNavAidInfo(ref, 
-							  NULL,	// type
-							  &latitude,	// lat
-							  &longitude,	// lon
-							  NULL,	// height
-							  &freq,	// freq
-							  NULL,	// heading
-							  buf,	// ID
-							  NULL,	// name
-							  NULL);	// reg
-	  }
-
-	  int32_t lon = (int32_t)(longitude / 360.0 * (65536.0 * 65536.0));
-
-	  XCCopyMemory(target, &lon);
-  }
+  int16_t res = (int16_t)GetBCD(freq);
+  XCCopyMemory(target, &res);
+}
 
-  void NAV1RwyHdg(unsigned char* target)
-  {	// runway heading nav1
+void LatitudeHi(unsigned char *target) {
+  double latitude = GetDouble("sim/flightmodel/position/latitude");
 
-	  int16_t crs = (int16_t)(WrapHeading(GetFloat("sim/cockpit/radios/nav1_course_degm") + 180) / 360.0 * 65536.0);
-	  XCCopyMemory(target, &crs);
-  }
+  latitude = latitude * (10001750.0 * 65536.0 * 65536.0) / 90.0;
 
-  void CenterFuelLevel(unsigned char* target)
-  {
+  int64_t lLat = (int64_t)latitude;
 
-	  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 1);
-	  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
-	  float weightkg = GetFloat("sim/flightmodel/weight/m_fuel", 1);
+  BYTE *lTarget = XConnectMemBlock;
+  lTarget += 0x0560;
 
-	  float proc = weightkg / (ratio * total);
-	  int32_t iProc = (int32_t)(proc * 128.0 * 65536.0);
+  uint32_t dLo = ((uint32_t *)&lLat)[1];
+  uint32_t dHi = ((uint32_t *)&lLat)[0];
 
-	  XCCopyMemory(target, &iProc);
-  }
+  XCCopyMemory(lTarget, &lLat);
 
-  void CenterFuelCapacity(unsigned char* target)
-  {
+  XCCopyMemory(target, &dHi);
+}
 
-	  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 1);
-	  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
-	  int32_t cap = (int32_t)KilogramsToGallons(ratio * total);
+void LatitudeLo(unsigned char *target) {
+  double latitude = GetDouble("sim/flightmodel/position/latitude");
 
-	  XCCopyMemory(target, &cap);
-  }
+  latitude = latitude * (10001750.0 * 65536.0 * 65536.0) / 90.0;
 
-  void LeftFuelLevel(unsigned char* target)
-  {
-	  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 0);
-	  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
-	  float weightkg = GetFloat("sim/flightmodel/weight/m_fuel", 0);
+  int64_t lLat = (int64_t)latitude;
 
-	  float proc = weightkg / (ratio * total);
-	  int32_t iProc = (int32_t)(proc * 128.0 * 65536.0);
+  BYTE *lTarget = XConnectMemBlock;
+  lTarget += 0x0560;
 
-	  XCCopyMemory(target, &iProc);
+  uint32_t dLo = ((uint32_t *)&lLat)[1];
+  uint32_t dHi = ((uint32_t *)&lLat)[0];
 
-	  //fprintf(str, "Fuel total weight: %e\n", total);
-  }
+  XCCopyMemory(lTarget, &lLat);
 
-  void LeftFuelCapacity(unsigned char* target)
-  {
-	  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 0);
-	  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
-	  int32_t cap = (int32_t)KilogramsToGallons(ratio * total);
+  XCCopyMemory(target, &dLo);
+}
 
-	  XCCopyMemory(target, &cap);
-  }
+void LongitudeHi(unsigned char *target) {
+  double longitude = GetDouble("sim/flightmodel/position/longitude");
 
-  void RightFuelLevel(unsigned char* target)
-  {
-	  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 2);
-	  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
-	  float weightkg = GetFloat("sim/flightmodel/weight/m_fuel", 2);
+  longitude = longitude * (65536.0 * 65536.0 * 65536.0 * 65536.0) / 360.0;
 
-	  float proc = weightkg / (ratio * total);
-	  int32_t iProc = (int32_t)(proc * 128.0 * 65536.0);
+  int64_t lLon = (int64_t)longitude;
 
-	  XCCopyMemory(target, &iProc);
-  }
+  BYTE *lTarget = XConnectMemBlock;
+  lTarget += 0x0568;
 
-  void RightFuelCapacity(unsigned char* target)
-  {
-	  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 2);
-	  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
-	  int32_t cap = (int32_t)KilogramsToGallons(ratio * total);
+  uint32_t dLo = ((uint32_t *)&lLon)[1];
+  uint32_t dHi = ((uint32_t *)&lLon)[0];
 
-	  XCCopyMemory(target, &cap);
-  }
+  XCCopyMemory(lTarget, &lLon);
 
-  void PitchInput(unsigned char* target)
-  {
-	  int16_t ratio = (int16_t)(GetFloat("sim/joystick/yoke_pitch_ratio") * 16383.0);
-	  XCCopyMemory(target, &ratio);
-  }
+  XCCopyMemory(target, &dHi);
+}
 
-  void RollInput(unsigned char* target)
-  {
-	  int16_t ratio = (int16_t)(GetFloat("sim/joystick/yoke_roll_ratio") * 16383.0);
-	  XCCopyMemory(target, &ratio);
-  }
+void LongitudeLo(unsigned char *target) {
+  double longitude = GetDouble("sim/flightmodel/position/longitude");
 
-  void DME1(unsigned char* target)
-  {
-	  float dist = GetFloat("sim/cockpit2/radios/indicators/nav1_dme_distance_nm");
-	  char dme[5];
-	  if(dist>99.9)
-	  {
-		  sprintf(dme, "%.0f", dist);
-	  }
-	  else
-	  {
-		  sprintf(dme, "%00.1f", dist);
-	  }
-	  dme[4] = 0;
-	  CopyMemory(target, dme, 5);
-  }
+  longitude = longitude * (65536.0 * 65536.0 * 65536.0 * 65536.0) / 360.0;
 
-  void DME2(unsigned char* target)
-  {
-	  float dist = GetFloat("sim/cockpit2/radios/indicators/nav2_dme_distance_nm");
-	  char dme[5];
-	  if(dist>99.9)
-	  {
-		  sprintf(dme, "%.0f", dist);
-	  }
-	  else
-	  {
-		  sprintf(dme, "%00.1f", dist);
-	  }
-	  dme[4] = 0;
-	  CopyMemory(target, dme, 5);
-  }
+  int64_t lLon = (int64_t)longitude;
 
-  void NAV1Deflection(unsigned char* target)
-  {
-	  char loc = (char)(GetFloat("sim/cockpit2/radios/indicators/nav1_hdef_dots_pilot") / 2.5 * 127);
-	  XCCopyMemory(target, &loc);
-  }
+  BYTE *lTarget = XConnectMemBlock;
+  lTarget += 0x0568;
 
-  void NAV1GS(unsigned char* target)
-  {
-	  char gs = (char)(GetFloat("sim/cockpit2/radios/indicators/nav1_vdef_dots_pilot") / 2.5 * 127);
-	  XCCopyMemory(target, &gs);
-  }
+  uint32_t dLo = ((uint32_t *)&lLon)[1];
+  uint32_t dHi = ((uint32_t *)&lLon)[0];
 
-  void NAV1FromTo(unsigned char* target)
-  {
-	  char fromto = (char)GetInt("sim/cockpit2/radios/indicators/nav1_flag_from_to_pilot");
-	  XCCopyMemory(target, &fromto);
-  }
+  XCCopyMemory(lTarget, &lLon);
 
-  void NAV1CDI(unsigned char* target)
-  {
-	  char flag = (char)GetInt("sim/cockpit/radios/nav1_CDI");
-	  XCCopyMemory(target, &flag);
-  }
+  XCCopyMemory(target, &dLo);
+}
 
-  void NAV1OBS(unsigned char* target)
-  {
-	  float fObs = GetFloat("sim/cockpit/radios/nav1_obs_degm");
-	  //fprintf(str, "Nav 1 obs: %f\n", fObs);
+void Altitude(unsigned char *target) {
+  double elevation = GetDouble("sim/flightmodel/position/elevation");
 
-	  int16_t obs = (int16_t)fObs;
-	  XCCopyMemory(target, &obs);
+  int64_t lAlt = (int64_t)(elevation * 65536.0 * 65536.0);
 
-	  /*fObs = GetFloat("sim/cockpit/radios/nav1_obs_degt");
-	  fprintf(str, "sim/cockpit/radios/nav1_obs_degt: %f\n", fObs);
-	  fObs = GetFloat("sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot");
-	  fprintf(str, "sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot: %f\n", fObs);
-	  fObs = GetFloat("sim/cockpit2/radios/actuators/nav1_course_deg_mag_pilot");
-	  fprintf(str, "sim/cockpit2/radios/actuators/nav1_course_deg_mag_pilot: %f\n", fObs);*/
+  XCCopyMemory(target, &lAlt);
+}
 
-  }
+void Pitch(unsigned char *target) { // pitch
+  float pitch = GetFloat("sim/flightmodel/position/theta");
+  pitch = pitch / 360.0f * (65536.0f * 65536.0f);
+  int32_t iPitch = (int32_t)-pitch;
+  XCCopyMemory(target, &iPitch);
+}
 
-  void NAV1Radial(unsigned char* target)
-  {	// nav1 radial
-	  int16_t bgn = (int16_t)(WrapHeading(GetFloat("sim/cockpit2/radios/indicators/nav1_bearing_deg_mag") - 180) / 360.0 * 65536.0);
-	  XCCopyMemory(target, &bgn);
-  }
+void Roll(unsigned char *target) { // bank
+  float bank = GetFloat("sim/flightmodel/position/phi");
+  bank = bank / 360.0f * (65536.0f * 65536.0f);
+  int32_t iBank = (int32_t)-bank;
+  XCCopyMemory(target, &iBank);
+}
 
-  void NAV2Deflection(unsigned char* target)
-  {
-	  char loc = (char)(GetFloat("sim/cockpit2/radios/indicators/nav2_hdef_dots_pilot") / 2.5 * 127);
-	  XCCopyMemory(target, &loc);
-  }
+void Heading(unsigned char *target) { // heading
+  double hdg = (double)GetFloat("sim/flightmodel/position/psi");
 
-  void NAV2FromTo(unsigned char* target)
-  {
-	  char fromto = (char)GetInt("sim/cockpit2/radios/indicators/nav2_flag_from_to_pilot");
-	  XCCopyMemory(target, &fromto);
-  }
+  hdg = hdg / 360.0 * (65536.0 * 65536.0);
 
-  void NAV2OBS(unsigned char* target)
-  {
-	  int16_t obs = (int16_t)GetFloat("sim/cockpit/radios/nav2_obs_degm");
-	  XCCopyMemory(target, &obs);
-  }
+  // fprintf(str, "Heading: %e\n", hdg);
 
-  void NAV2Radial(unsigned char* target)
-  {	// nav1 radial
-	  int16_t bgn = (int16_t)(WrapHeading(GetFloat("sim/cockpit2/radios/indicators/nav2_bearing_deg_mag") - 180) / 360.0 * 65536.0);
-	  XCCopyMemory(target, &bgn);
-  }
+  uint32_t iHdg = (uint32_t)hdg;
 
-  void NAV2GS(unsigned char* target)
-  {
-	  char gs = (char)(GetFloat("sim/cockpit2/radios/indicators/nav2_vdef_dots_pilot") / 2.5 * 127);
-	  XCCopyMemory(target, &gs);
-  }
+  // fprintf(str, "Heading int: %d\n", iHdg);
+  XCCopyMemory(target, &iHdg);
+}
 
-  void NAV2CDI(unsigned char* target)
-  {
-	  char flag = (char)GetInt("sim/cockpit/radios/nav2_CDI");
-	  XCCopyMemory(target, &flag);
-  }
+void NAV2RwyHdg(unsigned char *target) { // runway heading nav2
+  int16_t crs = (int16_t)(
+      WrapHeading(GetFloat("sim/cockpit/radios/nav2_course_degm") + 180) /
+      360.0 * 65536.0);
+  XCCopyMemory(target, &crs);
+}
 
-  void Temp(unsigned char* target)
-  {
-	  int16_t oat = (int16_t)(GetFloat("sim/weatcher/temperature_ambient_c") * 256.0);
-	  XCCopyMemory(target, &oat);
-  }
+void NAV2Latitude(unsigned char *target) {
+  int freq = GetInt("sim/cockpit/radios/nav2_freq_hz");
+  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
+  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
 
-  void WindSpeed(unsigned char* target)
-  {	// wind speed
-	  int16_t wsp = (int16_t)GetFloat("sim/weather/wind_speed_kt");
-	  XCCopyMemory(target, &wsp);
-  }
+  /*fprintf(str, "Freq: %d\n", freq);
+  fprintf(str, "Lat: %f\n", latitude);
+  fprintf(str, "Lon: %f\n", longitude);*/
 
-  void WindDir(unsigned char* target)
-  {	// wind direction
-	  int16_t wdir = (int16_t)(GetFloat("sim/weather/wind_direction_degt") / 360.0 * 65536);
-	  XCCopyMemory(target, &wdir);
-  }
+  XPLMNavRef ref =
+      XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
 
-  void Eng1N1(unsigned char* target)
-  {
-	  double n1 = (double)GetFloat("sim/cockpit2/engine/indicators/N1_percent", 0);
-	  XCCopyMemory(target, &n1);
-  }
+  char buf[6];
+  for (int i = 0; i < 6; i++)
+    buf[i] = 0;
 
-  void Eng1N2(unsigned char* target)
-  {
-	  double n2 = (double)GetFloat("sim/cockpit2/engine/indicators/N2_percent", 0);
-	  XCCopyMemory(target, &n2);
+  if (ref != XPLM_NAV_NOT_FOUND) {
+    XPLMGetNavAidInfo(ref,
+                      NULL,       // type
+                      &latitude,  // lat
+                      &longitude, // lon
+                      NULL,       // height
+                      &freq,      // freq
+                      NULL,       // heading
+                      buf,        // ID
+                      NULL,       // name
+                      NULL);      // reg
   }
 
-  void Eng1Throttle(unsigned char* target)
-  {
-	  int16_t thr = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_thro", 0) * 16384.0);
-	  XCCopyMemory(target, &thr);
+  int32_t lat = (int32_t)(latitude / 90.0 * 10001750.0);
 
+  XCCopyMemory(target, &lat);
+}
 
+void NAV1Latitude(unsigned char *target) {
+  int freq = GetInt("sim/cockpit/radios/nav1_freq_hz");
+  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
+  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
 
+  /*fprintf(str, "Freq: %d\n", freq);
+  fprintf(str, "Lat: %f\n", latitude);
+  fprintf(str, "Lon: %f\n", longitude);*/
 
-  }
+  XPLMNavRef ref =
+      XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
 
-  void Eng1Temp(unsigned char* target)
-  {
-	  int16_t egt = (int16_t)(GetFloat("sim/cockpit2/engine/indicators/EGT_deg_C", 0) / 860.0 * 16384.0);
-	  XCCopyMemory(target, &egt);
-  }
+  char buf[6];
+  for (int i = 0; i < 6; i++)
+    buf[i] = 0;
 
-  void Eng1OilPress(unsigned char* target)
-  {
-	  int16_t oilp = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_press_psi", 0) / 55.0 * 16384.0);
-	  XCCopyMemory(target, &oilp);
+  if (ref != XPLM_NAV_NOT_FOUND) {
+    XPLMGetNavAidInfo(ref,
+                      NULL,       // type
+                      &latitude,  // lat
+                      &longitude, // lon
+                      NULL,       // height
+                      &freq,      // freq
+                      NULL,       // heading
+                      buf,        // ID
+                      NULL,       // name
+                      NULL);      // reg
   }
 
-  void Eng1OilTemp(unsigned char* target)
-  {
-	  int16_t oilt = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_temp_c", 0) / 140.0 * 16384.0);
-	  XCCopyMemory(target, &oilt);
-  }
+  int32_t lat = (int32_t)(latitude / 90.0 * 10001750.0);
 
-  void Eng1OilQty(unsigned char* target)
-  {
-	  int32_t oilq = (int32_t)(GetFloat("sim/cockpit2/engine/indicators/oil_quantity_ratio", 0) * 16384.0);
-	  XCCopyMemory(target, &oilq);
-  }
+  XCCopyMemory(target, &lat);
+}
 
-  void Eng1HydraulicQty(unsigned char* target)
-  {
-	  int32_t hydq = (int32_t)(GetFloat("sim/cockpit/misc/hydraulic_quantity") / 100.0 * 16384.0);
-	  XCCopyMemory(target, &hydq);
-  }
+void NAV2Longitude(unsigned char *target) {
+  int freq = GetInt("sim/cockpit/radios/nav2_freq_hz");
+  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
+  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
 
-  void Eng1FuelFlow(unsigned char* target)
-  {
-	  double ff = (double)(GetFloat("sim/flightmodel/engine/ENGN_FF_", 0) * 3600 / 0.45359237);
-	  XCCopyMemory(target, &ff);
-  }
+  /*fprintf(str, "Freq: %d\n", freq);
+  fprintf(str, "Lat: %f\n", latitude);
+  fprintf(str, "Lon: %f\n", longitude);*/
 
-  void Eng2Throttle(unsigned char* target)
-  {
-	  int16_t thr = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_thro", 1) * 16384.0);
-	  XCCopyMemory(target, &thr);
-  }
+  XPLMNavRef ref =
+      XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
 
-  void Flaps1(unsigned char* target)
-  {
-	  int32_t flappos = (int32_t)(GetFloat("sim/flightmodel2/controls/flap1_deploy_ratio") * 16383.0);
-	  XCCopyMemory(target, &flappos);
-  }
+  char buf[6];
+  for (int i = 0; i < 6; i++)
+    buf[i] = 0;
 
-  void Flaps2(unsigned char* target)
-  {
-	  int32_t flappos = (int32_t)(GetFloat("sim/flightmodel2/controls/flap2_deploy_ratio") * 16383.0);
-	  XCCopyMemory(target, &flappos);
+  if (ref != XPLM_NAV_NOT_FOUND) {
+    XPLMGetNavAidInfo(ref,
+                      NULL,       // type
+                      &latitude,  // lat
+                      &longitude, // lon
+                      NULL,       // height
+                      &freq,      // freq
+                      NULL,       // heading
+                      buf,        // ID
+                      NULL,       // name
+                      NULL);      // reg
   }
 
-  void MachSpeed(unsigned char* target)
-  {
-	  int16_t mach = (int16_t)(GetFloat("sim/flightmodel/misc/machno") * 20480.0);
-	  XCCopyMemory(target, &mach);
-  }
+  int32_t lon = (int32_t)(longitude / 360.0 * (65536.0 * 65536.0));
 
-  void TAT(unsigned char* target)
-  {
-	  float oat = GetFloat("sim/weatcher/temperature_ambient_c");
-	  float mach = GetFloat("sim/flightmodel/misc/machno");
-
-	  float tat = oat * (1 + 0.2f * mach * mach) * 256.0f;
-	  int16_t sTat = (int16_t)tat;
-	  XCCopyMemory(target, &sTat);
-  }
+  XCCopyMemory(target, &lon);
+}
 
-  void Eng2N1(unsigned char* target)
-  {
-	  double n1 = (double)GetFloat("sim/cockpit2/engine/indicators/N1_percent", 1);
-	  XCCopyMemory(target, &n1);
-  }
+void NAV1Longitude(unsigned char *target) {
+  int freq = GetInt("sim/cockpit/radios/nav1_freq_hz");
+  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
+  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
 
-  void Eng2N2(unsigned char* target)
-  {
-	  double n2 = (double)GetFloat("sim/cockpit2/engine/indicators/N2_percent", 1);
-	  XCCopyMemory(target, &n2);
-  }
+  /*fprintf(str, "Freq: %d\n", freq);
+  fprintf(str, "Lat: %f\n", latitude);
+  fprintf(str, "Lon: %f\n", longitude);*/
 
-  void Eng2Temp(unsigned char* target)
-  {
-	  int16_t egt = (int16_t)(GetFloat("sim/cockpit2/engine/indicators/EGT_deg_C", 0) / 860.0 * 16384.0);
-	  XCCopyMemory(target, &egt);
-  }
+  XPLMNavRef ref =
+      XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
 
-  void Eng2OilPress(unsigned char* target)
-  {
-	  int16_t oilp = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_press_psi", 1) / 55.0 * 16384.0);
-	  XCCopyMemory(target, &oilp);
-  }
+  char buf[6];
+  for (int i = 0; i < 6; i++)
+    buf[i] = 0;
 
-  void Eng2OilTemp(unsigned char* target)
-  {
-	  int16_t oilt = (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_temp_c", 1) / 140.0 * 16384.0);
-	  XCCopyMemory(target, &oilt);
+  if (ref != XPLM_NAV_NOT_FOUND) {
+    XPLMGetNavAidInfo(ref,
+                      NULL,       // type
+                      &latitude,  // lat
+                      &longitude, // lon
+                      NULL,       // height
+                      &freq,      // freq
+                      NULL,       // heading
+                      buf,        // ID
+                      NULL,       // name
+                      NULL);      // reg
   }
 
-  void Eng2OilQty(unsigned char* target)
-  {
-	  int32_t oilq = (int32_t)(GetFloat("sim/cockpit2/engine/indicators/oil_quantity_ratio", 1) * 16384.0);
-	  XCCopyMemory(target, &oilq);
-  }
+  int32_t lon = (int32_t)(longitude / 360.0 * (65536.0 * 65536.0));
 
-  void Eng2HydraulicQty(unsigned char* target)
-  {
-	  int32_t hydq = (int32_t)(GetFloat("sim/cockpit/misc/hydraulic_quantity2") / 100.0 * 16384.0);
-	  XCCopyMemory(target, &hydq);
-  }
+  XCCopyMemory(target, &lon);
+}
 
-  void Eng2FuelFlow(unsigned char* target)
-  {
-	  double ff = (double)(GetFloat("sim/flightmodel/engine/ENGN_FF_", 0) * 3600 / 0.45359237);
-	  XCCopyMemory(target, &ff);
-  }
+void NAV1RwyHdg(unsigned char *target) { // runway heading nav1
 
-  void NAV1Info(unsigned char* target)
-  {   // nav1 identity
+  int16_t crs = (int16_t)(
+      WrapHeading(GetFloat("sim/cockpit/radios/nav1_course_degm") + 180) /
+      360.0 * 65536.0);
+  XCCopyMemory(target, &crs);
+}
 
-	  int freq = GetInt("sim/cockpit/radios/nav1_freq_hz");
-	  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
-	  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
+void CenterFuelLevel(unsigned char *target) {
 
-	  /*fprintf(str, "Freq: %d\n", freq);
-	  fprintf(str, "Lat: %f\n", latitude);
-	  fprintf(str, "Lon: %f\n", longitude);*/
+  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 1);
+  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
+  float weightkg = GetFloat("sim/flightmodel/weight/m_fuel", 1);
 
-	  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
+  float proc = weightkg / (ratio * total);
+  int32_t iProc = (int32_t)(proc * 128.0 * 65536.0);
 
+  XCCopyMemory(target, &iProc);
+}
 
-	  char buf[6];
-	  for(int i = 0;i<6;i++)
-		  buf[i] = 0;
+void CenterFuelCapacity(unsigned char *target) {
 
+  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 1);
+  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
+  int32_t cap = (int32_t)KilogramsToGallons(ratio * total);
 
-	  if(ref != XPLM_NAV_NOT_FOUND)
-	  {
-		  XPLMGetNavAidInfo(ref, 
-							  NULL,	// type
-							  &latitude,	// lat
-							  &longitude,	// lon
-							  NULL,	// height
-							  &freq,	// freq
-							  NULL,	// heading
-							  buf,	// ID
-							  NULL,	// name
-							  NULL);	// reg
-	  }
+  XCCopyMemory(target, &cap);
+}
 
-	  CopyMemory(target, buf, 6);
+void LeftFuelLevel(unsigned char *target) {
+  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 0);
+  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
+  float weightkg = GetFloat("sim/flightmodel/weight/m_fuel", 0);
 
-  }
+  float proc = weightkg / (ratio * total);
+  int32_t iProc = (int32_t)(proc * 128.0 * 65536.0);
 
-  void NAV2Info(unsigned char* target)
-  {   // nav2 identity
-	  int freq = GetInt("sim/cockpit/radios/nav2_freq_hz");
-	  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
-	  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
-
-	  /*fprintf(str, "Freq: %d\n", freq);
-	  fprintf(str, "Lat: %f\n", latitude);
-	  fprintf(str, "Lon: %f\n", longitude);*/
-
-	  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
-
-	  char buf[6];
-	  for(int i = 0;i<6;i++)
-		  buf[i] = 0;
-
-
-	  if(ref != XPLM_NAV_NOT_FOUND)
-	  {
-		  XPLMGetNavAidInfo(ref, 
-							  NULL,	// type
-							  &latitude,	// lat
-							  &longitude,	// lon
-							  NULL,	// height
-							  &freq,	// freq
-							  NULL,	// heading
-							  buf,	// ID
-							  NULL,	// name
-							  NULL);	// reg
-	  }
-
-	  CopyMemory(target, buf, 6);
+  XCCopyMemory(target, &iProc);
 
-  }
+  // fprintf(str, "Fuel total weight: %e\n", total);
+}
 
-  void ADF1Info(unsigned char* target)
-  {   // nav2 identity
-	  int freq = GetInt("sim/cockpit/radios/adf1_freq_hz");
-	  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
-	  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
-
-	  /*fprintf(str, "Freq: %d\n", freq);
-	  fprintf(str, "Lat: %f\n", latitude);
-	  fprintf(str, "Lon: %f\n", longitude);*/
-
-	  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 2);
-
-	  char buf[6];
-	  for(int i = 0;i<6;i++)
-		  buf[i] = 0;
-
-
-	  if(ref != XPLM_NAV_NOT_FOUND)
-	  {
-		  XPLMGetNavAidInfo(ref, 
-							  NULL,	// type
-							  &latitude,	// lat
-							  &longitude,	// lon
-							  NULL,	// height
-							  &freq,	// freq
-							  NULL,	// heading
-							  buf,	// ID
-							  NULL,	// name
-							  NULL);	// reg
-	  }
-
-	  CopyMemory(target, buf, 6);
+void LeftFuelCapacity(unsigned char *target) {
+  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 0);
+  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
+  int32_t cap = (int32_t)KilogramsToGallons(ratio * total);
 
-  }
+  XCCopyMemory(target, &cap);
+}
 
-  void COM2Freq(unsigned char* target)
-  {	// com2 freq
-	  int freq = GetInt("sim/cockpit/radios/com2_freq_hz") - 10000;
-		
-	  //fprintf(str, "Nav 1 freq: %d\n", freq);
-
-	  int16_t res = (int16_t)GetBCD(freq);
-	  XCCopyMemory(target, &res);
-  }
+void RightFuelLevel(unsigned char *target) {
+  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 2);
+  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
+  float weightkg = GetFloat("sim/flightmodel/weight/m_fuel", 2);
 
-  void HeightAGL(unsigned char* target)
-  {	// ground altitude
-	  int32_t agl = (int32_t)(GetFloat("sim/flightmodel/position/y_agl") * 65536.0);
-	  XCCopyMemory(target, &agl);
-  }
+  float proc = weightkg / (ratio * total);
+  int32_t iProc = (int32_t)(proc * 128.0 * 65536.0);
 
-  void RadioFlags(unsigned char* target)
-  {	// radio status flags
-		
-	  bool goodnav1 = GetInt("sim/cockpit/radios/nav_type", 0) != 0; 
-	  bool goodnav2 = GetInt("sim/cockpit/radios/nav_type", 1) != 0;
-	  bool goodadf1 = GetInt("sim/cockpit/radios/nav_type", 2) != 0;
-	  bool goodadf2 = GetInt("sim/cockpit/radios/nav_type", 3) != 0;
-	  bool nav1isils = GetInt("sim/cockpit/radios/nav_type", 0) == 4;
-	  bool nav2isils = GetInt("sim/cockpit/radios/nav_type", 1) == 4;
-	  bool nav1hasdme = GetInt("sim/cockpit/radios/nav1_has_dme", 1) != 0;
-	  bool nav2hasdme = GetInt("sim/cockpit/radios/nav2_has_dme", 1) != 0;
-
-	  int16_t ret = 0;
-
-	  if(goodnav1)
-		  ret += 2;
-	  if(goodnav2)
-		  ret += 4;
-	  if(goodadf1)
-		  ret += 8;
-	  if(nav1hasdme)
-		  ret += 16;
-	  if(nav2hasdme)
-		  ret += 32;
-	  if(nav1isils)
-		  ret += 64;
-	  if(goodadf2)
-		  ret += 2048;
-	  if(nav2isils)
-		  ret += 4096;
-
-	  XCCopyMemory(target, &ret);
-  }
+  XCCopyMemory(target, &iProc);
+}
 
-  void XConnectVersion(unsigned char* target)
-  {	// XConnect Version
-	  int32_t version = 0x20000000;
-	  XCCopyMemory(target, &version);
-  }
+void RightFuelCapacity(unsigned char *target) {
+  float ratio = GetFloat("sim/aircraft/overflow/acf_tank_rat", 2);
+  float total = GetFloat("sim/aircraft/weight/acf_m_fuel_tot");
+  int32_t cap = (int32_t)KilogramsToGallons(ratio * total);
 
-  void XPlaneVersion(unsigned char* target)
-  {	// X-Plane Version
-	  int32_t version = 0xFADE0006;
-	  XCCopyMemory(target, &version);
-  }
+  XCCopyMemory(target, &cap);
+}
 
-  void PressureAltitude(unsigned char* target)
-  {   // Barometric altitude
-	  int32_t alt = (int32_t)GetFloat("sim/flightmodel/misc/h_ind2");
-	  XCCopyMemory(target, &alt);
-  }
+void PitchInput(unsigned char *target) {
+  int16_t ratio =
+      (int16_t)(GetFloat("sim/joystick/yoke_pitch_ratio") * 16383.0);
+  XCCopyMemory(target, &ratio);
+}
 
-  void Eng1ThrottleInput(unsigned char* target)
-  {
-	  int16_t ratio = (int16_t)(GetFloat("sim/cockpit2/engine/actuators/throttle_ratio",0) * 16384.0);
-	  XCCopyMemory(target, &ratio);
-  }
+void RollInput(unsigned char *target) {
+  int16_t ratio = (int16_t)(GetFloat("sim/joystick/yoke_roll_ratio") * 16383.0);
+  XCCopyMemory(target, &ratio);
+}
 
-  void Eng2ThrottleInput(unsigned char* target)
-  {
-	  int16_t ratio = (int16_t)(GetFloat("sim/cockpit2/engine/actuators/throttle_ratio",1) * 16384.0);
-	  XCCopyMemory(target, &ratio);
+void DME1(unsigned char *target) {
+  float dist = GetFloat("sim/cockpit2/radios/indicators/nav1_dme_distance_nm");
+  char dme[5];
+  if (dist > 99.9) {
+    sprintf(dme, "%.0f", dist);
+  } else {
+    sprintf(dme, "%00.1f", dist);
   }
+  dme[4] = 0;
+  CopyMemory(target, dme, 5);
+}
 
-  void StandbyQNH(unsigned char* target)
-  {
-	  float altimeter = GetFloat("sim/cockpit/misc/barometer_setting2");
-	  int16_t sAlt = ((int16_t)InchToHPA(altimeter)) * 16;
-	  XCCopyMemory(target, &sAlt);
+void DME2(unsigned char *target) {
+  float dist = GetFloat("sim/cockpit2/radios/indicators/nav2_dme_distance_nm");
+  char dme[5];
+  if (dist > 99.9) {
+    sprintf(dme, "%.0f", dist);
+  } else {
+    sprintf(dme, "%00.1f", dist);
   }
+  dme[4] = 0;
+  CopyMemory(target, dme, 5);
+}
 
-  void StandbyAltitude(unsigned char* target)
-  {
-	  int32_t alt = (int32_t)GetFloat("sim/flightmodel/misc/h_ind_copilot2");
-	  XCCopyMemory(target, &alt);
-  }
+void NAV1Deflection(unsigned char *target) {
+  char loc =
+      (char)(GetFloat("sim/cockpit2/radios/indicators/nav1_hdef_dots_pilot") /
+             2.5 * 127);
+  XCCopyMemory(target, &loc);
+}
+
+void NAV1GS(unsigned char *target) {
+  char gs =
+      (char)(GetFloat("sim/cockpit2/radios/indicators/nav1_vdef_dots_pilot") /
+             2.5 * 127);
+  XCCopyMemory(target, &gs);
+}
+
+void NAV1FromTo(unsigned char *target) {
+  char fromto =
+      (char)GetInt("sim/cockpit2/radios/indicators/nav1_flag_from_to_pilot");
+  XCCopyMemory(target, &fromto);
+}
+
+void NAV1CDI(unsigned char *target) {
+  char flag = (char)GetInt("sim/cockpit/radios/nav1_CDI");
+  XCCopyMemory(target, &flag);
+}
+
+void NAV1OBS(unsigned char *target) {
+  float fObs = GetFloat("sim/cockpit/radios/nav1_obs_degm");
+  // fprintf(str, "Nav 1 obs: %f\n", fObs);
+
+  int16_t obs = (int16_t)fObs;
+  XCCopyMemory(target, &obs);
+
+  /*fObs = GetFloat("sim/cockpit/radios/nav1_obs_degt");
+  fprintf(str, "sim/cockpit/radios/nav1_obs_degt: %f\n", fObs);
+  fObs = GetFloat("sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot");
+  fprintf(str, "sim/cockpit2/radios/actuators/nav1_obs_deg_mag_pilot: %f\n",
+  fObs);
+  fObs = GetFloat("sim/cockpit2/radios/actuators/nav1_course_deg_mag_pilot");
+  fprintf(str, "sim/cockpit2/radios/actuators/nav1_course_deg_mag_pilot: %f\n",
+  fObs);*/
+}
+
+void NAV1Radial(unsigned char *target) { // nav1 radial
+  int16_t bgn = (int16_t)(
+      WrapHeading(
+          GetFloat("sim/cockpit2/radios/indicators/nav1_bearing_deg_mag") -
+          180) /
+      360.0 * 65536.0);
+  XCCopyMemory(target, &bgn);
+}
+
+void NAV2Deflection(unsigned char *target) {
+  char loc =
+      (char)(GetFloat("sim/cockpit2/radios/indicators/nav2_hdef_dots_pilot") /
+             2.5 * 127);
+  XCCopyMemory(target, &loc);
+}
+
+void NAV2FromTo(unsigned char *target) {
+  char fromto =
+      (char)GetInt("sim/cockpit2/radios/indicators/nav2_flag_from_to_pilot");
+  XCCopyMemory(target, &fromto);
+}
+
+void NAV2OBS(unsigned char *target) {
+  int16_t obs = (int16_t)GetFloat("sim/cockpit/radios/nav2_obs_degm");
+  XCCopyMemory(target, &obs);
+}
+
+void NAV2Radial(unsigned char *target) { // nav1 radial
+  int16_t bgn = (int16_t)(
+      WrapHeading(
+          GetFloat("sim/cockpit2/radios/indicators/nav2_bearing_deg_mag") -
+          180) /
+      360.0 * 65536.0);
+  XCCopyMemory(target, &bgn);
+}
+
+void NAV2GS(unsigned char *target) {
+  char gs =
+      (char)(GetFloat("sim/cockpit2/radios/indicators/nav2_vdef_dots_pilot") /
+             2.5 * 127);
+  XCCopyMemory(target, &gs);
+}
+
+void NAV2CDI(unsigned char *target) {
+  char flag = (char)GetInt("sim/cockpit/radios/nav2_CDI");
+  XCCopyMemory(target, &flag);
+}
+
+void Temp(unsigned char *target) {
+  int16_t oat =
+      (int16_t)(GetFloat("sim/weatcher/temperature_ambient_c") * 256.0);
+  XCCopyMemory(target, &oat);
+}
+
+void WindSpeed(unsigned char *target) { // wind speed
+  int16_t wsp = (int16_t)GetFloat("sim/weather/wind_speed_kt");
+  XCCopyMemory(target, &wsp);
+}
+
+void WindDir(unsigned char *target) { // wind direction
+  int16_t wdir =
+      (int16_t)(GetFloat("sim/weather/wind_direction_degt") / 360.0 * 65536);
+  XCCopyMemory(target, &wdir);
+}
+
+void Eng1N1(unsigned char *target) {
+  double n1 = (double)GetFloat("sim/cockpit2/engine/indicators/N1_percent", 0);
+  XCCopyMemory(target, &n1);
+}
+
+void Eng1N2(unsigned char *target) {
+  double n2 = (double)GetFloat("sim/cockpit2/engine/indicators/N2_percent", 0);
+  XCCopyMemory(target, &n2);
+}
+
+void Eng1Throttle(unsigned char *target) {
+  int16_t thr =
+      (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_thro", 0) * 16384.0);
+  XCCopyMemory(target, &thr);
+}
+
+void Eng1Temp(unsigned char *target) {
+  int16_t egt =
+      (int16_t)(GetFloat("sim/cockpit2/engine/indicators/EGT_deg_C", 0) /
+                860.0 * 16384.0);
+  XCCopyMemory(target, &egt);
+}
+
+void Eng1OilPress(unsigned char *target) {
+  int16_t oilp =
+      (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_press_psi", 0) /
+                55.0 * 16384.0);
+  XCCopyMemory(target, &oilp);
+}
+
+void Eng1OilTemp(unsigned char *target) {
+  int16_t oilt = (int16_t)(
+      GetFloat("sim/flightmodel/engine/ENGN_oil_temp_c", 0) / 140.0 * 16384.0);
+  XCCopyMemory(target, &oilt);
+}
+
+void Eng1OilQty(unsigned char *target) {
+  int32_t oilq = (int32_t)(
+      GetFloat("sim/cockpit2/engine/indicators/oil_quantity_ratio", 0) *
+      16384.0);
+  XCCopyMemory(target, &oilq);
+}
+
+void Eng1HydraulicQty(unsigned char *target) {
+  int32_t hydq = (int32_t)(GetFloat("sim/cockpit/misc/hydraulic_quantity") /
+                           100.0 * 16384.0);
+  XCCopyMemory(target, &hydq);
+}
+
+void Eng1FuelFlow(unsigned char *target) {
+  double ff = (double)(GetFloat("sim/flightmodel/engine/ENGN_FF_", 0) * 3600 /
+                       0.45359237);
+  XCCopyMemory(target, &ff);
+}
+
+void Eng2Throttle(unsigned char *target) {
+  int16_t thr =
+      (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_thro", 1) * 16384.0);
+  XCCopyMemory(target, &thr);
+}
+
+void Flaps1(unsigned char *target) {
+  int32_t flappos = (int32_t)(
+      GetFloat("sim/flightmodel2/controls/flap1_deploy_ratio") * 16383.0);
+  XCCopyMemory(target, &flappos);
+}
+
+void Flaps2(unsigned char *target) {
+  int32_t flappos = (int32_t)(
+      GetFloat("sim/flightmodel2/controls/flap2_deploy_ratio") * 16383.0);
+  XCCopyMemory(target, &flappos);
+}
+
+void MachSpeed(unsigned char *target) {
+  int16_t mach = (int16_t)(GetFloat("sim/flightmodel/misc/machno") * 20480.0);
+  XCCopyMemory(target, &mach);
+}
+
+void TAT(unsigned char *target) {
+  float oat = GetFloat("sim/weatcher/temperature_ambient_c");
+  float mach = GetFloat("sim/flightmodel/misc/machno");
+
+  float tat = oat * (1 + 0.2f * mach * mach) * 256.0f;
+  int16_t sTat = (int16_t)tat;
+  XCCopyMemory(target, &sTat);
+}
+
+void Eng2N1(unsigned char *target) {
+  double n1 = (double)GetFloat("sim/cockpit2/engine/indicators/N1_percent", 1);
+  XCCopyMemory(target, &n1);
+}
+
+void Eng2N2(unsigned char *target) {
+  double n2 = (double)GetFloat("sim/cockpit2/engine/indicators/N2_percent", 1);
+  XCCopyMemory(target, &n2);
+}
+
+void Eng2Temp(unsigned char *target) {
+  int16_t egt =
+      (int16_t)(GetFloat("sim/cockpit2/engine/indicators/EGT_deg_C", 0) /
+                860.0 * 16384.0);
+  XCCopyMemory(target, &egt);
+}
+
+void Eng2OilPress(unsigned char *target) {
+  int16_t oilp =
+      (int16_t)(GetFloat("sim/flightmodel/engine/ENGN_oil_press_psi", 1) /
+                55.0 * 16384.0);
+  XCCopyMemory(target, &oilp);
+}
+
+void Eng2OilTemp(unsigned char *target) {
+  int16_t oilt = (int16_t)(
+      GetFloat("sim/flightmodel/engine/ENGN_oil_temp_c", 1) / 140.0 * 16384.0);
+  XCCopyMemory(target, &oilt);
+}
+
+void Eng2OilQty(unsigned char *target) {
+  int32_t oilq = (int32_t)(
+      GetFloat("sim/cockpit2/engine/indicators/oil_quantity_ratio", 1) *
+      16384.0);
+  XCCopyMemory(target, &oilq);
+}
+
+void Eng2HydraulicQty(unsigned char *target) {
+  int32_t hydq = (int32_t)(GetFloat("sim/cockpit/misc/hydraulic_quantity2") /
+                           100.0 * 16384.0);
+  XCCopyMemory(target, &hydq);
+}
+
+void Eng2FuelFlow(unsigned char *target) {
+  double ff = (double)(GetFloat("sim/flightmodel/engine/ENGN_FF_", 0) * 3600 /
+                       0.45359237);
+  XCCopyMemory(target, &ff);
+}
+
+void NAV1Info(unsigned char *target) { // nav1 identity
+
+  int freq = GetInt("sim/cockpit/radios/nav1_freq_hz");
+  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
+  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
+
+  /*fprintf(str, "Freq: %d\n", freq);
+  fprintf(str, "Lat: %f\n", latitude);
+  fprintf(str, "Lon: %f\n", longitude);*/
+
+  XPLMNavRef ref =
+      XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
+
+  char buf[6];
+  for (int i = 0; i < 6; i++)
+    buf[i] = 0;
+
+  if (ref != XPLM_NAV_NOT_FOUND) {
+    XPLMGetNavAidInfo(ref,
+                      NULL,       // type
+                      &latitude,  // lat
+                      &longitude, // lon
+                      NULL,       // height
+                      &freq,      // freq
+                      NULL,       // heading
+                      buf,        // ID
+                      NULL,       // name
+                      NULL);      // reg
+  }
+
+  CopyMemory(target, buf, 6);
+}
+
+void NAV2Info(unsigned char *target) { // nav2 identity
+  int freq = GetInt("sim/cockpit/radios/nav2_freq_hz");
+  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
+  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
+
+  /*fprintf(str, "Freq: %d\n", freq);
+  fprintf(str, "Lat: %f\n", latitude);
+  fprintf(str, "Lon: %f\n", longitude);*/
+
+  XPLMNavRef ref =
+      XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 1036 + 16 + 32);
+
+  char buf[6];
+  for (int i = 0; i < 6; i++)
+    buf[i] = 0;
+
+  if (ref != XPLM_NAV_NOT_FOUND) {
+    XPLMGetNavAidInfo(ref,
+                      NULL,       // type
+                      &latitude,  // lat
+                      &longitude, // lon
+                      NULL,       // height
+                      &freq,      // freq
+                      NULL,       // heading
+                      buf,        // ID
+                      NULL,       // name
+                      NULL);      // reg
+  }
+
+  CopyMemory(target, buf, 6);
+}
+
+void ADF1Info(unsigned char *target) { // nav2 identity
+  int freq = GetInt("sim/cockpit/radios/adf1_freq_hz");
+  float longitude = (float)GetDouble("sim/flightmodel/position/longitude");
+  float latitude = (float)GetDouble("sim/flightmodel/position/latitude");
+
+  /*fprintf(str, "Freq: %d\n", freq);
+  fprintf(str, "Lat: %f\n", latitude);
+  fprintf(str, "Lon: %f\n", longitude);*/
+
+  XPLMNavRef ref = XPLMFindNavAid(NULL, NULL, &latitude, &longitude, &freq, 2);
+
+  char buf[6];
+  for (int i = 0; i < 6; i++)
+    buf[i] = 0;
+
+  if (ref != XPLM_NAV_NOT_FOUND) {
+    XPLMGetNavAidInfo(ref,
+                      NULL,       // type
+                      &latitude,  // lat
+                      &longitude, // lon
+                      NULL,       // height
+                      &freq,      // freq
+                      NULL,       // heading
+                      buf,        // ID
+                      NULL,       // name
+                      NULL);      // reg
+  }
+
+  CopyMemory(target, buf, 6);
+}
+
+void COM2Freq(unsigned char *target) { // com2 freq
+  int freq = GetInt("sim/cockpit/radios/com2_freq_hz") - 10000;
+
+  // fprintf(str, "Nav 1 freq: %d\n", freq);
+
+  int16_t res = (int16_t)GetBCD(freq);
+  XCCopyMemory(target, &res);
+}
+
+void HeightAGL(unsigned char *target) { // ground altitude
+  int32_t agl = (int32_t)(GetFloat("sim/flightmodel/position/y_agl") * 65536.0);
+  XCCopyMemory(target, &agl);
+}
+
+void RadioFlags(unsigned char *target) { // radio status flags
+
+  bool goodnav1 = GetInt("sim/cockpit/radios/nav_type", 0) != 0;
+  bool goodnav2 = GetInt("sim/cockpit/radios/nav_type", 1) != 0;
+  bool goodadf1 = GetInt("sim/cockpit/radios/nav_type", 2) != 0;
+  bool goodadf2 = GetInt("sim/cockpit/radios/nav_type", 3) != 0;
+  bool nav1isils = GetInt("sim/cockpit/radios/nav_type", 0) == 4;
+  bool nav2isils = GetInt("sim/cockpit/radios/nav_type", 1) == 4;
+  bool nav1hasdme = GetInt("sim/cockpit/radios/nav1_has_dme", 1) != 0;
+  bool nav2hasdme = GetInt("sim/cockpit/radios/nav2_has_dme", 1) != 0;
+
+  int16_t ret = 0;
+
+  if (goodnav1)
+    ret += 2;
+  if (goodnav2)
+    ret += 4;
+  if (goodadf1)
+    ret += 8;
+  if (nav1hasdme)
+    ret += 16;
+  if (nav2hasdme)
+    ret += 32;
+  if (nav1isils)
+    ret += 64;
+  if (goodadf2)
+    ret += 2048;
+  if (nav2isils)
+    ret += 4096;
+
+  XCCopyMemory(target, &ret);
+}
+
+void XConnectVersion(unsigned char *target) { // XConnect Version
+  int32_t version = 0x20000000;
+  XCCopyMemory(target, &version);
+}
+
+void XPlaneVersion(unsigned char *target) { // X-Plane Version
+  int32_t version = 0xFADE0006;
+  XCCopyMemory(target, &version);
+}
+
+void PressureAltitude(unsigned char *target) { // Barometric altitude
+  int32_t alt = (int32_t)GetFloat("sim/flightmodel/misc/h_ind2");
+  XCCopyMemory(target, &alt);
+}
+
+void Eng1ThrottleInput(unsigned char *target) {
+  int16_t ratio = (int16_t)(
+      GetFloat("sim/cockpit2/engine/actuators/throttle_ratio", 0) * 16384.0);
+  XCCopyMemory(target, &ratio);
+}
+
+void Eng2ThrottleInput(unsigned char *target) {
+  int16_t ratio = (int16_t)(
+      GetFloat("sim/cockpit2/engine/actuators/throttle_ratio", 1) * 16384.0);
+  XCCopyMemory(target, &ratio);
+}
+
+void StandbyQNH(unsigned char *target) {
+  float altimeter = GetFloat("sim/cockpit/misc/barometer_setting2");
+  int16_t sAlt = ((int16_t)InchToHPA(altimeter)) * 16;
+  XCCopyMemory(target, &sAlt);
+}
+
+void StandbyAltitude(unsigned char *target) {
+  int32_t alt = (int32_t)GetFloat("sim/flightmodel/misc/h_ind_copilot2");
+  XCCopyMemory(target, &alt);
+}
 
 } // namespace xcread

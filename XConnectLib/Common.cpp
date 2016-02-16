@@ -15,8 +15,7 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.h"
 
-
-BYTE* XConnectMemBlock;
+BYTE *XConnectMemBlock;
 bool Throttle1Disconnect = false;
 bool Throttle2Disconnect = false;
 bool PitchDisconnect = false;

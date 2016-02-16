@@ -22,15 +22,14 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 #include <utility>
 
+typedef std::function<void(unsigned char *)> VariableReader;
 
-typedef std::function<void(unsigned char*)> VariableReader;
-
-void GetVariableReaders(size_t offset, size_t size, std::vector<std::pair<size_t, VariableReader> >& o_readers)
-{
+void GetVariableReaders(
+    size_t offset, size_t size,
+    std::vector<std::pair<size_t, VariableReader>> &o_readers) {
   static bool init = true;
   static VariableReader readers[0x4000];
-  if (init)
-  {
+  if (init) {
     init = false;
     using namespace xcread;
     readers[0x0020] = GroundElev;
@@ -130,35 +129,33 @@ void GetVariableReaders(size_t offset, size_t size, std::vector<std::pair<size_t
     readers[0x3542] = StandbyQNH;
     readers[0x3544] = StandbyAltitude;
   }
-  while (size)
-  {
-    if (readers[offset]) o_readers.push_back(std::make_pair(offset, readers[offset]));
+  while (size) {
+    if (readers[offset])
+      o_readers.push_back(std::make_pair(offset, readers[offset]));
     size--;
     offset++;
   }
 }
 
-void GetVariable(BYTE* target, DWORD offset, DWORD size)
-{
-	//char debug[256];
-	//sprintf(debug, "XConnect: read offset 0x%lx (%lu bytes)\n", offset, size);
-	//XPLMDebugString(debug);
+void GetVariable(BYTE *target, DWORD offset, DWORD size) {
+  // char debug[256];
+  // sprintf(debug, "XConnect: read offset 0x%lx (%lu bytes)\n", offset, size);
+  // XPLMDebugString(debug);
 
-//	FILE* str = fopen("XConnect.out", "a+");
+  //	FILE* str = fopen("XConnect.out", "a+");
 
-	std::vector<std::pair<size_t, VariableReader> > readers;
-	GetVariableReaders(offset, size, readers);
-	for (size_t i = 0; i < readers.size(); ++i)
-	{
-	  size_t off = readers[i].first;
-	  VariableReader& reader = readers[i].second;
+  std::vector<std::pair<size_t, VariableReader>> readers;
+  GetVariableReaders(offset, size, readers);
+  for (size_t i = 0; i < readers.size(); ++i) {
+    size_t off = readers[i].first;
+    VariableReader &reader = readers[i].second;
 
-	  reader(XConnectMemBlock + off);
-	}
+    reader(XConnectMemBlock + off);
+  }
 
-	BYTE* memory = XConnectMemBlock;
-	memory+=offset;
-	CopyMemory(target, memory, size);
+  BYTE *memory = XConnectMemBlock;
+  memory += offset;
+  CopyMemory(target, memory, size);
 
-//	fclose(str);
+  //	fclose(str);
 }
